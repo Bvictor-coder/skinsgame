@@ -33,8 +33,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// Serve static frontend in production
-if (process.env.NODE_ENV === 'production') {
+// Serve static frontend in production (only if SERVE_STATIC is enabled)
+if (process.env.NODE_ENV === 'production' && process.env.SERVE_STATIC === 'true') {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   
@@ -42,6 +42,17 @@ if (process.env.NODE_ENV === 'production') {
   
   app.get('*', (req, res) => {
     res.sendFile(join(__dirname, '../../client/build/index.html'));
+  });
+} else {
+  // For API-only mode, handle 404s for non-API routes
+  app.use((req, res, next) => {
+    if (!req.path.startsWith('/api') && req.path !== '/health') {
+      return res.status(404).json({ 
+        message: 'API endpoint not found',
+        availableEndpoints: ['/api/friends', '/api/games', '/api/signups', '/health']
+      });
+    }
+    next();
   });
 }
 
