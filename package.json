@@ -1,0 +1,41 @@
+{
+  "name": "golf-skins-game-organizer",
+  "version": "1.0.0",
+  "description": "Full stack application for organizing golf skins games",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/src/index.js",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/golf-skins-game-organizer.git"
+  },
+  "keywords": [
+    "golf",
+    "skins",
+    "game",
+    "mern",
+    "mongodb",
+    "express",
+    "react",
+    "node"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yourusername/golf-skins-game-organizer/issues"
+  },
+  "homepage": "https://github.com/yourusername/golf-skins-game-organizer#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

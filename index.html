@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Skins Game Organizer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Golf Skins Game Organizer</h1>
+    </header>
+    
+    <main>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="upcoming">Upcoming Games</button>
+            <button class="tab-btn" data-tab="new-game">Create New Game</button>
+            <button class="tab-btn" data-tab="sign-up">Weekly Sign-up</button>
+            <button class="tab-btn" data-tab="grouping">Pairings & Groups</button>
+            <button class="tab-btn" data-tab="friends">Friends</button>
+            <button class="tab-btn" data-tab="history">Game History</button>
+            <button class="tab-btn" data-tab="rules">Game Rules</button>
+        </div>
+        
+        <div class="tab-content active" id="upcoming">
+            <h2>Upcoming Games</h2>
+            <div id="upcoming-games-list">
+                <p class="empty-state">No upcoming games. Create a new game to get started!</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="new-game">
+            <h2>Create New Game</h2>
+            <form id="new-game-form">
+                <div class="form-group">
+                    <label for="game-date">Date:</label>
+                    <input type="date" id="game-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="game-time">Tee Time:</label>
+                    <input type="time" id="game-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="game-course">Golf Course:</label>
+                    <input type="text" id="game-course" placeholder="Enter golf course name" required>
+                </div>
+                <div class="form-group">
+                    <label for="game-holes">Number of Holes:</label>
+                    <select id="game-holes" required>
+                        <option value="18">18 Holes</option>
+                        <option value="9">9 Holes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="game-ctp-hole">Closest to Pin Hole #:</label>
+                    <input type="number" id="game-ctp-hole" min="1" max="18" value="2">
+                </div>
+                <div class="form-group">
+                    <label for="game-entry-fee">Entry Fee per Player ($):</label>
+                    <input type="number" id="game-entry-fee" min="0" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="game-signup-deadline">Sign-up Deadline:</label>
+                    <input type="date" id="game-signup-deadline">
+                    <p class="hint">Players must sign up by this date to be included in groupings</p>
+                </div>
+                <div class="form-group">
+                    <label for="game-wolf-enabled">
+                        <input type="checkbox" id="game-wolf-enabled">
+                        Enable Wolf Game Option
+                    </label>
+                    <p class="hint">Players can opt to join the Wolf group during sign-up</p>
+                </div>
+                <div class="form-group">
+                    <label for="game-notes">Notes:</label>
+                    <textarea id="game-notes" placeholder="Additional information about the game"></textarea>
+                </div>
+                <button type="submit" class="btn">Create Game</button>
+            </form>
+        </div>
+        
+        <div class="tab-content" id="sign-up">
+            <h2>Weekly Sign-up</h2>
+            <div id="signup-games-list">
+                <p class="empty-state">No upcoming games available for sign-up. Create a new game first!</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="grouping">
+            <h2>Pairings & Groups</h2>
+            <div id="grouping-games-list">
+                <p class="empty-state">No games ready for grouping. Games will appear here after their sign-up deadline.</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="friends">
+            <h2>Friends</h2>
+            <form id="add-friend-form">
+                <div class="form-group inline">
+                    <input type="text" id="friend-name" placeholder="Friend's name" required>
+                    <input type="email" id="friend-email" placeholder="Friend's email" required>
+                    <input type="number" id="friend-handicap" placeholder="Handicap index" step="0.1" min="0" max="54">
+                    <button type="submit" class="btn">Add Friend</button>
+                </div>
+            </form>
+            <div id="friends-list">
+                <p class="empty-state">No friends added yet. Add friends to invite them to games!</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="history">
+            <h2>Game History</h2>
+            <div id="game-history-list">
+                <p class="empty-state">No previous games found.</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="rules">
+            <h2>Weekly Skins Game Rules</h2>
+            <div class="rules-container">
+                <ol>
+                    <li>
+                        <strong>Game Type:</strong> Weekly Skins Game.
+                    </li>
+                    <li>
+                        <strong>Participants:</strong> A subset of ~30 players each week.
+                    </li>
+                    <li>
+                        <strong>Scoring:</strong> Hole-by-hole net scores.
+                    </li>
+                    <li>
+                        <strong>Handicap System ("Half Pop"):</strong>
+                        <ul>
+                            <li>Players receive handicap strokes on specific holes based on their handicap and the hole's difficulty rating.</li>
+                            <li>Crucially, each handicap stroke allocated on a hole reduces the player's gross score by 0.5 strokes (not a full stroke) to calculate their net score for that hole.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Skins Award:</strong>
+                        <ul>
+                            <li>A "skin" is won on a hole if one and only one player has the lowest net score for that hole.</li>
+                            <li>If there's a tie for the lowest net score on a hole, no skin is awarded for that hole (the skin "carries over" in concept, but effectively just isn't won).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Closest to the Pin (CTP) Skin:</strong>
+                        <ul>
+                            <li>There is a separate, guaranteed skin awarded for being closest to the pin on a specific hole (Hole #2 on your course). This skin is independent of the hole's skin.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Pot & Payout:</strong>
+                        <ul>
+                            <li>Each participating player contributes $10 to the pot.</li>
+                            <li>Total Pot = (Number of Players) * $10.</li>
+                            <li>The Total Pot is divided equally among all skins won (hole skins + CTP skin).</li>
+                            <li>Value per Skin = Total Pot / Total Number of Skins Won.</li>
+                            <li>Players are paid based on the number of skins they personally won: Prize Payout = (Number of Skins Won by Player) * (Value per Skin).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Weekly Sign-up:</strong>
+                        <ul>
+                            <li>Players need to sign up by the deadline to indicate they want to play in that week's game.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Pairing/Grouping:</strong>
+                        <ul>
+                            <li>Based on weekly sign-ups, the application creates playing groups (foursomes typically).</li>
+                            <li>Threesomes may be created if the total number of players isn't divisible by 4.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Special "Wolf" Group:</strong>
+                        <ul>
+                            <li>Players can opt to play in the separate "Wolf" game during sign-up.</li>
+                            <li>All Wolf players are grouped together in one dedicated foursome (or threesome if fewer than 4).</li>
+                            <li>The remaining players are randomly assigned to the other foursomes/threesomes.</li>
+                            <li>Wolf players still participate in the main Skins game with everyone else.</li>
+                            <li><em>Note: The internal rules, betting, and scoring of the Wolf game itself are not managed by this application.</em></li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Game Details Modal -->
+    <div id="game-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Game Details</h2>
+            <div id="game-details-content"></div>
+            <div class="form-group" id="record-scores-section">
+                <h3>Record Scores & Skins</h3>
+                <div id="score-inputs"></div>
+                <h4>Closest to Pin Winner (Hole <span id="ctp-hole-num">2</span>)</h4>
+                <select id="ctp-winner">
+                    <option value="">-- Select Player --</option>
+                </select>
+                <button id="save-scores" class="btn">Save Scores & Calculate Skins</button>
+            </div>
+            <div id="skins-results" style="display: none;">
+                <h3>Skins Results</h3>
+                <div class="skins-summary">
+                    <p>Total Pot: $<span id="total-pot">0</span></p>
+                    <p>Total Skins Won: <span id="total-skins">0</span></p>
+                    <p>Value Per Skin: $<span id="skin-value">0</span></p>
+                </div>
+                <h4>Skins Won By Hole</h4>
+                <div id="skins-by-hole"></div>
+                <h4>Payouts</h4>
+                <div id="player-payouts"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sign-Up Modal -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Sign Up for <span id="signup-game-title"></span></h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-player">Select Your Name:</label>
+                    <select id="signup-player" required>
+                        <option value="">-- Select your name --</option>
+                    </select>
+                </div>
+                <div class="form-group wolf-option">
+                    <label>
+                        <input type="checkbox" id="signup-wolf-opt">
+                        I want to play in the Wolf group
+                    </label>
+                    <p class="hint">Wolf players will be grouped together in their own foursome</p>
+                </div>
+                <div class="form-group">
+                    <label for="signup-notes">Notes (optional):</label>
+                    <textarea id="signup-notes" placeholder="Any special requests or notes for the organizer"></textarea>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Grouping Modal -->
+    <div id="grouping-modal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close-modal">&times;</span>
+            <h2>Create Groups for <span id="grouping-game-title"></span></h2>
+            <div class="grid-container">
+                <div class="grid-item signup-list">
+                    <h3>Signed Up Players</h3>
+                    <div id="signed-players-list">
+                        <!-- Signed up players will be displayed here -->
+                    </div>
+                </div>
+                <div class="grid-item controls">
+                    <button id="auto-group" class="btn">Auto-Create Groups</button>
+                    <div class="hint">
+                        <p>Auto grouping will:</p>
+                        <ul>
+                            <li>Group Wolf players together (if enabled)</li>
+                            <li>Create foursomes when possible</li>
+                            <li>Create threesomes only when needed</li>
+                        </ul>
+                    </div>
+                    <button id="reset-groups" class="btn secondary">Reset Groups</button>
+                </div>
+                <div class="grid-item group-display">
+                    <h3>Generated Groups</h3>
+                    <div id="groups-container">
+                        <!-- Groups will be displayed here -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button id="save-groups" class="btn">Save Groups</button>
+                <button id="cancel-grouping" class="btn secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Golf Skins Game Organizer &copy; 2025</p>
+    </footer>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

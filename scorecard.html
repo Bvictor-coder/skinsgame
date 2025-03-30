@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golf Scorecard | Scorekeeper View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --light-green: #e8f5e9;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --border-color: #ddd;
+            --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            --wolf-color: #1976d2;
+            --wolf-light: #e3f2fd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+            max-width: 100vw;
+            overflow-x: hidden;
+            padding-bottom: 80px; /* Space for fixed navigation */
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .game-info {
+            background-color: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .game-info p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .game-info .group-name {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .hole-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 73px; /* Height of the header */
+            z-index: 90;
+        }
+        
+        .tee-selector {
+            background-color: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tee-selector select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .hole-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: var(--light-green);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .hole-info p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .hole-info .key {
+            font-weight: bold;
+        }
+        
+        .hole-number {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .hole-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .hole-nav button {
+            background-color: var(--light-green);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .hole-nav button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .score-entry {
+            background-color: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .player-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .player-score:last-child {
+            border-bottom: none;
+        }
+        
+        .player-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .score-input-wrapper {
+            width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .score-controls {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .score-btn {
+            background-color: var(--light-gray);
+            border: none;
+            width: 36px;
+            height: 36px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .score-btn:active {
+            background-color: var(--border-color);
+        }
+        
+        .score-display {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .ctp-player .player-name {
+            color: var(--wolf-color);
+        }
+        
+        .ctp-player .player-name::after {
+            content: " 🎯";
+        }
+        
+        .wolf-player .player-name {
+            color: var(--wolf-color);
+        }
+        
+        .wolf-badge {
+            display: inline-block;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            background-color: var(--wolf-light);
+            color: var(--wolf-color);
+            margin-left: 0.5rem;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        
+        .bottom-nav button {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .bottom-nav button.secondary {
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .bottom-nav button:hover {
+            opacity: 0.9;
+        }
+        
+        .auth-error {
+            padding: 2rem;
+            text-align: center;
+            background-color: #ffebee;
+            color: #c62828;
+            margin: 2rem;
+            border-radius: 8px;
+        }
+        
+        .auth-error h2 {
+            margin-bottom: 1rem;
+            color: #b71c1c;
+        }
+        
+        .auth-error a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+        
+        /* Styles for swipe gestures */
+        .score-entry {
+            touch-action: pan-y;
+        }
+        
+        /* Success animation */
+        @keyframes success-flash {
+            0% { background-color: var(--primary-color); }
+            100% { background-color: var(--light-green); }
+        }
+        
+        .save-success {
+            animation: success-flash 1s ease;
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Scorecard</h1>
+        <p id="game-title">Loading game information...</p>
+    </header>
+    
+    <div id="auth-error" style="display: none;" class="auth-error">
+        <h2>Access Error</h2>
+        <p>You don't have permission to view this scorecard or the link is invalid.</p>
+        <a href="index.html">Return to Golf Skins Organizer</a>
+    </div>
+    
+    <div id="scorecard-container" style="display: none;">
+        <div class="game-info">
+            <p class="group-name" id="group-name">Loading group...</p>
+            <p>Scorekeeper: <span id="scorekeeper-name">-</span></p>
+            <p id="course-info">Course: Monarch Dunes</p>
+            <p id="date-info">Date: -</p>
+        </div>
+        
+        <div class="tee-selector">
+            <select id="tee-select">
+                <option value="Black">Black Tees</option>
+                <option value="Gold">Gold Tees</option>
+                <option value="Combo White/Gold">Combo White/Gold Tees</option>
+                <option value="White" selected>White Tees</option>
+                <option value="Bronze">Bronze Tees</option>
+                <option value="Combo Bronze/Green">Combo Bronze/Green Tees</option>
+                <option value="Green">Green Tees</option>
+            </select>
+        </div>
+        
+        <div class="hole-selector">
+            <span class="hole-number">Hole <span id="current-hole">1</span></span>
+            <div class="hole-nav">
+                <button id="prev-hole" disabled><i class="fas fa-chevron-left"></i> Prev</button>
+                <button id="next-hole">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        
+        <div id="hole-details" class="hole-info">
+            <p><span class="key">Par:</span> <span id="hole-par">-</span></p>
+            <p><span class="key">Yards:</span> <span id="hole-yards">-</span></p>
+            <p><span class="key">HCP:</span> <span id="hole-hcp">-</span></p>
+        </div>
+        
+        <div id="score-entry" class="score-entry">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div class="bottom-nav">
+            <button id="all-holes-btn" class="secondary">All Holes</button>
+            <button id="submit-scores-btn">Submit All Scores</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import Monarch Dunes course data
+        import { getMonarchDunesData, calculateHandicapStrokes } from './monarch-dunes.js';
+        
+        // Main data object
+        let scorecardData = {
+            game: null,
+            group: null,
+            groupIndex: -1,
+            players: [],
+            currentHole: 1,
+            scores: {},
+            accessValid: false,
+            scorekeeper: null,
+            courseData: getMonarchDunesData(),
+            selectedTee: "White" // Default tee selection
+        };
+        
+        // DOM elements
+        const gameTitle = document.getElementById('game-title');
+        const groupName = document.getElementById('group-name');
+        const scorekeeperName = document.getElementById('scorekeeper-name');
+        const courseInfo = document.getElementById('course-info');
+        const dateInfo = document.getElementById('date-info');
+        const currentHoleDisplay = document.getElementById('current-hole');
+        const prevHoleBtn = document.getElementById('prev-hole');
+        const nextHoleBtn = document.getElementById('next-hole');
+        const scoreEntry = document.getElementById('score-entry');
+        const authError = document.getElementById('auth-error');
+        const scorecardContainer = document.getElementById('scorecard-container');
+        const submitScoresBtn = document.getElementById('submit-scores-btn');
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse the access token from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get('access');
+            
+            if (accessToken) {
+                try {
+                    // Decode the access token
+                    const decoded = atob(accessToken);
+                    const [gameId, groupIndex, scorekeeperId] = decoded.split(':');
+                    
+                    // Load app data from localStorage
+                    const appData = loadAppData();
+                    
+                    // Validate the access
+                    const game = appData.games.find(g => g.id === gameId);
+                    if (game && game.groups && game.groups[groupIndex]) {
+                        const group = game.groups[groupIndex];
+                        
+                        // Check if user is the scorekeeper
+                        if (group.scorekeeperId === scorekeeperId) {
+                            scorecardData.accessValid = true;
+                            scorecardData.game = game;
+                            scorecardData.group = group;
+                            scorecardData.groupIndex = parseInt(groupIndex);
+                            
+                            // Setup player data
+                            setupPlayerData(appData, group, game);
+                            
+                            // Initialize the UI
+                            initializeUI();
+                            
+                            // Show the scorecard
+                            scorecardContainer.style.display = 'block';
+                        } else {
+                            showAuthError();
+                        }
+                    } else {
+                        showAuthError();
+                    }
+                } catch (error) {
+                    console.error('Error decoding access token:', error);
+                    showAuthError();
+                }
+            } else {
+                showAuthError();
+            }
+        });
+        
+        // Load app data from localStorage
+        function loadAppData() {
+            const savedData = localStorage.getItem('golfSkinsOrganizer');
+            if (savedData) {
+                try {
+                    return JSON.parse(savedData);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    return { friends: [], games: [], signups: {} };
+                }
+            }
+            return { friends: [], games: [], signups: {} };
+        }
+        
+        // Set up player data
+        function setupPlayerData(appData, group, game) {
+            // Get the signups for this game
+            const signups = appData.signups[game.id] || [];
+            
+            // Prepare player data
+            group.playerIds.forEach(playerId => {
+                const player = appData.friends.find(f => f.id === playerId);
+                const signup = signups.find(s => s.playerId === playerId);
+                
+                if (player) {
+                    const isWolf = signup && signup.wolf;
+                    const isScorekeeper = playerId === group.scorekeeperId;
+                    
+                    scorecardData.players.push({
+                        id: player.id,
+                        name: player.name,
+                        handicap: player.handicap,
+                        isWolf: isWolf,
+                        isScorekeeper: isScorekeeper
+                    });
+                    
+                    // If this player is the scorekeeper, save reference
+                    if (isScorekeeper) {
+                        scorecardData.scorekeeper = player;
+                    }
+                }
+            });
+            
+            // Initialize scores from existing data if available
+            if (game.scores && game.scores.raw) {
+                game.scores.raw.forEach(playerScore => {
+                    if (group.playerIds.includes(playerScore.playerId)) {
+                        scorecardData.scores[playerScore.playerId] = playerScore.holes;
+                    }
+                });
+            } else {
+                // Initialize empty scores
+                scorecardData.players.forEach(player => {
+                    scorecardData.scores[player.id] = {};
+                });
+            }
+        }
+        
+        // Initialize the UI
+        function initializeUI() {
+            const game = scorecardData.game;
+            const group = scorecardData.group;
+            
+            // Set header information
+            gameTitle.textContent = game.course;
+            groupName.textContent = `Group ${parseInt(scorecardData.groupIndex) + 1}${group.isWolfGroup ? ' (Wolf Group)' : ''}`;
+            scorekeeperName.textContent = scorecardData.scorekeeper ? scorecardData.scorekeeper.name : '-';
+            courseInfo.textContent = `Course: ${game.course}`;
+            
+            const gameDate = new Date(game.date);
+            dateInfo.textContent = `Date: ${gameDate.toLocaleDateString()}`;
+            
+            // Set up navigation events
+            prevHoleBtn.addEventListener('click', navigateToPreviousHole);
+            nextHoleBtn.addEventListener('click', navigateToNextHole);
+            submitScoresBtn.addEventListener('click', submitAllScores);
+            
+            // Set up tee selector
+            const teeSelect = document.getElementById('tee-select');
+            teeSelect.value = scorecardData.selectedTee;
+            teeSelect.addEventListener('change', function() {
+                scorecardData.selectedTee = this.value;
+                updateHoleDetails();
+            });
+            
+            // Handle swipe gestures
+            setupSwipeNavigation();
+            
+            // Render the first hole
+            renderCurrentHole();
+            
+            // Update hole details for the first hole
+            updateHoleDetails();
+        }
+        
+        // Update hole details based on current hole and selected tee
+        function updateHoleDetails() {
+            const currentHole = scorecardData.currentHole;
+            const holePar = document.getElementById('hole-par');
+            const holeYards = document.getElementById('hole-yards');
+            const holeHcp = document.getElementById('hole-hcp');
+            
+            // Get course data
+            const courseData = scorecardData.courseData;
+            
+            // Get par for the current hole (0-indexed in array)
+            const par = courseData.par[currentHole - 1];
+            holePar.textContent = par;
+            
+            // Get handicap for the current hole (0-indexed in array)
+            const hcp = courseData.hcp.men[currentHole - 1];
+            holeHcp.textContent = hcp;
+            
+            // Get yards for the current hole based on selected tee
+            const teeData = courseData.tees.find(tee => tee.name === scorecardData.selectedTee);
+            if (teeData) {
+                const yards = teeData.yards[currentHole - 1];
+                holeYards.textContent = yards;
+            }
+        }
+        
+        // Render the current hole's score entry
+        function renderCurrentHole() {
+            const currentHole = scorecardData.currentHole;
+            const maxHoles = scorecardData.game.holes || 18;
+            
+            // Update hole display
+            currentHoleDisplay.textContent = currentHole;
+            
+            // Enable/disable navigation buttons
+            prevHoleBtn.disabled = currentHole === 1;
+            nextHoleBtn.disabled = currentHole === maxHoles;
+            
+            // Clear the score entry area
+            scoreEntry.innerHTML = '';
+            
+            // Add each player's score input
+            scorecardData.players.forEach(player => {
+                const isCTPHole = currentHole === scorecardData.game.ctpHole;
+                
+                const playerScoreDiv = document.createElement('div');
+                playerScoreDiv.className = `player-score ${player.isWolf ? 'wolf-player' : ''} ${isCTPHole ? 'ctp-player' : ''}`;
+                
+                const currentScore = scorecardData.scores[player.id][currentHole] || '';
+                
+                playerScoreDiv.innerHTML = `
+                    <div class="player-name">
+                        ${player.name}
+                        ${player.isWolf ? '<span class="wolf-badge">Wolf</span>' : ''}
+                    </div>
+                    <div class="score-input-wrapper">
+                        <div class="score-controls">
+                            <button class="score-btn minus-btn" data-player-id="${player.id}">-</button>
+                            <div class="score-display" data-player-id="${player.id}">${currentScore || '-'}</div>
+                            <button class="score-btn plus-btn" data-player-id="${player.id}">+</button>
+                        </div>
+                    </div>
+                `;
+                
+                scoreEntry.appendChild(playerScoreDiv);
+            });
+            
+            // Set up score adjustment buttons
+            setupScoreButtons();
+        }
+        
+        // Set up the score adjustment buttons
+        function setupScoreButtons() {
+            const minusButtons = document.querySelectorAll('.minus-btn');
+            const plusButtons = document.querySelectorAll('.plus-btn');
+            
+            minusButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const playerId = this.getAttribute('data-player-id');
+                    const scoreDisplay = document.querySelector(`.score-display[data-player-id="${playerId}"]`);
+                    let currentScore = scorecardData.scores[playerId][scorecardData.currentHole];
+                    
+                    if (currentScore && currentScore > 1) {
+                        currentScore--;
+                        updateScore(playerId, scorecardData.currentHole, currentScore);
+                        scoreDisplay.textContent = currentScore;
+                    }
+                });
+            });
+            
+            plusButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const playerId = this.getAttribute('data-player-id');
+                    const scoreDisplay = document.querySelector(`.score-display[data-player-id="${playerId}"]`);
+                    let currentScore = scorecardData.scores[playerId][scorecardData.currentHole] || 0;
+                    
+                    if (currentScore < 15) {
+                        currentScore++;
+                        updateScore(playerId, scorecardData.currentHole, currentScore);
+                        scoreDisplay.textContent = currentScore;
+                    }
+                });
+            });
+        }
+        
+        // Update a score in the data structure
+        function updateScore(playerId, hole, score) {
+            // Initialize holes object if it doesn't exist
+            if (!scorecardData.scores[playerId]) {
+                scorecardData.scores[playerId] = {};
+            }
+            
+            // Update the score
+            scorecardData.scores[playerId][hole] = score;
+            
+            // Quick save to localStorage
+            saveScoresToLocalStorage();
+        }
+        
+        // Save all scores to localStorage
+        function saveScoresToLocalStorage() {
+            const appData = loadAppData();
+            const game = appData.games.find(g => g.id === scorecardData.game.id);
+            
+            if (game) {
+                // Initialize scores if needed
+                if (!game.scores) {
+                    game.scores = {
+                        raw: []
+                    };
+                }
+                
+                // Update scores for each player in this group
+                scorecardData.players.forEach(player => {
+                    // Find existing player scores or create new entry
+                    let playerScores = game.scores.raw.find(s => s.playerId === player.id);
+                    
+                    if (!playerScores) {
+                        playerScores = {
+                            playerId: player.id,
+                            holes: {}
+                        };
+                        game.scores.raw.push(playerScores);
+                    }
+                    
+                    // Update with current scores
+                    playerScores.holes = { ...playerScores.holes, ...scorecardData.scores[player.id] };
+                });
+                
+                // Save back to localStorage
+                localStorage.setItem('golfSkinsOrganizer', JSON.stringify(appData));
+            }
+        }
+        
+        // Navigate to the previous hole
+        function navigateToPreviousHole() {
+            if (scorecardData.currentHole > 1) {
+                scorecardData.currentHole--;
+                renderCurrentHole();
+                updateHoleDetails(); // Update hole details after changing hole
+            }
+        }
+        
+        // Navigate to the next hole
+        function navigateToNextHole() {
+            const maxHoles = scorecardData.game.holes || 18;
+            if (scorecardData.currentHole < maxHoles) {
+                scorecardData.currentHole++;
+                renderCurrentHole();
+                updateHoleDetails(); // Update hole details after changing hole
+            }
+        }
+        
+        // Submit all scores
+        function submitAllScores() {
+            // Check if all holes have scores
+            const maxHoles = scorecardData.game.holes || 18;
+            let missingScores = false;
+            let holesMissing = [];
+            
+            // Check each hole
+            for (let hole = 1; hole <= maxHoles; hole++) {
+                let holeComplete = true;
+                
+                // Check each player
+                scorecardData.players.forEach(player => {
+                    if (!scorecardData.scores[player.id][hole]) {
+                        holeComplete = false;
+                    }
+                });
+                
+                if (!holeComplete) {
+                    missingScores = true;
+                    holesMissing.push(hole);
+                }
+            }
+            
+            if (missingScores) {
+                // Ask for confirmation if scores are missing
+                const confirmSubmit = confirm(`Some scores are missing for holes: ${holesMissing.join(', ')}. Submit anyway?`);
+                if (!confirmSubmit) {
+                    return;
+                }
+            }
+            
+            // Save scores to localStorage (final save)
+            saveScoresToLocalStorage();
+            
+            // Show success message
+            submitScoresBtn.textContent = 'Scores Saved ✓';
+            submitScoresBtn.classList.add('save-success');
+            
+            setTimeout(() => {
+                submitScoresBtn.textContent = 'Submit All Scores';
+                submitScoresBtn.classList.remove('save-success');
+            }, 2000);
+        }
+        
+        // Setup swipe navigation
+        function setupSwipeNavigation() {
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            scoreEntry.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+            
+            scoreEntry.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+            
+            function handleSwipe() {
+                const swipeThreshold = 50; // minimum distance to be considered a swipe
+                
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    // Swipe left - go to next hole
+                    if (!nextHoleBtn.disabled) {
+                        navigateToNextHole();
+                    }
+                }
+                
+                if (touchEndX > touchStartX + swipeThreshold) {
+                    // Swipe right - go to previous hole
+                    if (!prevHoleBtn.disabled) {
+                        navigateToPreviousHole();
+                    }
+                }
+            }
+        }
+        
+        // Show authentication error
+        function showAuthError() {
+            authError.style.display = 'block';
+            scorecardContainer.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
