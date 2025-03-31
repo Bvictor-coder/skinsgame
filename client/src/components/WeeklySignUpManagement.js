@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dataSync from '../utils/dataSync';
+import PrintablePlayersList from './PrintablePlayersList';
 
 const WeeklySignUpManagement = () => {
+  const printableRef = useRef(null);
+  const [showPrintView, setShowPrintView] = useState(false);
   const [games, setGames] = useState([]);
   const [players, setPlayers] = useState([]);
   const [signups, setSignups] = useState({});
@@ -264,6 +267,175 @@ const WeeklySignUpManagement = () => {
     return players.filter(player => !signedUpPlayerIds.includes(player.id));
   };
 
+  // Handle deleting a game
+  const handleDeleteGame = async (gameId) => {
+    if (!window.confirm('Are you sure you want to delete this game? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Get all games from localStorage
+      const storedData = JSON.parse(localStorage.getItem('golfSkinsOrganizer') || '{}');
+      const currentGames = storedData.games || [];
+      
+      // Filter out the game to delete
+      const updatedGames = currentGames.filter(game => game.id !== gameId);
+      
+      // Also remove any signups for this game
+      const currentSignups = storedData.signups || {};
+      delete currentSignups[gameId];
+      
+      // Update localStorage
+      localStorage.setItem('golfSkinsOrganizer', JSON.stringify({
+        ...storedData,
+        games: updatedGames,
+        signups: currentSignups
+      }));
+      
+      // Update local state
+      setGames(prevGames => prevGames.filter(game => game.id !== gameId));
+      
+      // If we just deleted the selected game, select another game
+      if (selectedGame && selectedGame.id === gameId) {
+        const remainingGames = games.filter(game => game.id !== gameId);
+        setSelectedGame(remainingGames.length > 0 ? remainingGames[0] : null);
+      }
+      
+      setSuccess('Game successfully deleted');
+      setLoading(false);
+    } catch (err) {
+      console.error('Error deleting game:', err);
+      setError('Failed to delete game');
+      setLoading(false);
+    }
+  };
+
+  // Handle print button
+  const handlePrint = () => {
+    if (!selectedGame) return;
+    
+    // Open printable view in a new window
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      setError('Could not open print window. Please check your popup blocker settings.');
+      return;
+    }
+    
+    const activeSignups = getActiveSignups();
+    
+    // Create HTML content for print
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Player List - ${getCourseName(selectedGame.course)}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          h1, h2, h3 {
+            margin-top: 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+          .player-count {
+            margin-bottom: 20px;
+          }
+          .player-group {
+            margin-bottom: 30px;
+          }
+          .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            button {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Player List - Central Coast Skins Game</h1>
+          <h2>${getCourseName(selectedGame.course)}</h2>
+          <p>
+            <strong>Date:</strong> ${new Date(selectedGame.date).toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}<br>
+            <strong>Time:</strong> ${selectedGame.time}<br>
+            <strong>Format:</strong> ${selectedGame.holes} Holes - Skins Game<br>
+            <strong>Entry Fee:</strong> $${selectedGame.entryFee || 0}
+          </p>
+        </div>
+        
+        <div class="player-count">
+          <strong>Total Players:</strong> ${activeSignups.length}<br>
+          <strong>Wolf Game Participants:</strong> ${activeSignups.filter(s => s.wolf).length}
+        </div>
+        
+        <h3>All Players</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Handicap</th>
+              <th>Wolf Game</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activeSignups.map(signup => {
+              const player = players.find(p => p.id === signup.playerId) || {};
+              return `
+                <tr>
+                  <td>${player.name || 'Unknown Player'}</td>
+                  <td>${player.handicap || 'N/A'}</td>
+                  <td>${signup.wolf ? 'Yes' : 'No'}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <p>Generated on ${new Date().toLocaleDateString()} - Central Coast Skins Game Organizer</p>
+        </div>
+        
+        <button onclick="window.print();" style="margin-top: 20px; padding: 10px 20px;">Print this page</button>
+      </body>
+      </html>
+    `;
+    
+    // Write content to new window and trigger print
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   return (
     <div className="weekly-signup-management">
       <h2>Weekly Sign-up Management</h2>
@@ -320,6 +492,22 @@ const WeeklySignUpManagement = () => {
                       {formatDate(selectedGame.date)} • {selectedGame.time} • 
                       {selectedGame.holes} holes • ${selectedGame.entryFee || 0}
                     </p>
+                  </div>
+                  <div className="game-actions">
+                    <button 
+                      className="btn btn-primary"
+                      onClick={handlePrint}
+                      disabled={getActiveSignups().length === 0}
+                    >
+                      <i className="fas fa-print"></i> Print Player List
+                    </button>
+                    <button 
+                      className="btn btn-danger"
+                      onClick={() => handleDeleteGame(selectedGame.id)}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      <i className="fas fa-trash"></i> Delete Game
+                    </button>
                   </div>
                 </div>
                 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import dataSync from '../utils/dataSync';
+import NewGameNotification from './NewGameNotification';
 
 const NewGameForm = () => {
   const initialFormState = {
@@ -18,6 +19,7 @@ const NewGameForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [newGame, setNewGame] = useState(null);
 
   // Course options
   const courses = [
@@ -92,7 +94,13 @@ const NewGameForm = () => {
       };
       
       // Add to dataSync
-      await dataSync.addGame(gameData);
+      const createdGame = await dataSync.addGame(gameData);
+      
+      // Set the newly created game for notification
+      setNewGame({
+        ...gameData,
+        id: createdGame.id
+      });
       
       // Reset form and show success message
       setFormData(initialFormState);
@@ -123,6 +131,14 @@ const NewGameForm = () => {
         <div className="alert alert-success">
           Game created successfully!
         </div>
+      )}
+      
+      {/* New Game Notification */}
+      {newGame && (
+        <NewGameNotification 
+          game={newGame} 
+          onClose={() => setNewGame(null)} 
+        />
       )}
       
       <div className="card">
