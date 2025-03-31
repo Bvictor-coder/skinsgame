@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser, ROLES } from '../utils/userContext';
 import LoginModal from './LoginModal';
+import '../styles/HeaderStyles.css';
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useUser();

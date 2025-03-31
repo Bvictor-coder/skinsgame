@@ -369,6 +369,12 @@
   cursor: pointer;
 }
 
+.actions-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .primary-btn {
   background-color: #006633;
   color: white;
@@ -376,6 +382,43 @@
 
 .primary-btn:hover {
   background-color: #005025;
+}
+
+.finalize-btn {
+  background-color: #27ae60;
+  color: white;
+}
+
+.finalize-btn:hover {
+  background-color: #2ecc71;
+}
+
+.game-finalized-message {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  font-weight: bold;
+  gap: 8px;
+}
+
+.game-finalized-message .fa-check-circle {
+  color: #27ae60;
+  font-size: 1.2em;
+}
+
+/* Radio button fixes for login form */
+.role-options label {
+  color: #333;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.role-options label input[type="radio"] {
+  margin-right: 10px;
 }
 
 /* ScoreCardAccessor Component Styles */
@@ -524,7 +567,8 @@
 
 .role-options {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 10px;
 }
 
@@ -532,7 +576,17 @@
   font-weight: normal;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.role-options label input[type="radio"] {
+  margin-right: 8px;
+}
+
+.role-options label:hover {
+  color: #006633;
 }
 
 .form-group select,

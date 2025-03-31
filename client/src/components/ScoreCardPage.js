@@ -180,22 +180,101 @@ const ScoreCardPage = () => {
   useEffect(() => {
     if (!game || !players.length || Object.keys(scores).length === 0) return;
     
-    // Prepare player data with handicaps for calculation
-    const playersData = players.map(player => ({
-      id: player.id,
-      name: player.name,
-      courseHandicap: handicaps[player.id] || 0
-    }));
+    // Function to fetch all players and scores across all groups
+    const fetchAllPlayersAndScores = async () => {
+      try {
+        console.log("Fetching data for ALL players in the game for skins calculation");
+        
+        // Get all players
+        const allPlayers = await dataSync.getFriends();
+        
+        // Get all groups for this game
+        const gameGroups = game.groups || [];
+        console.log(`Game has ${gameGroups.length} groups total`);
+        
+        // Collect all playerIds from all groups
+        const allPlayerIds = new Set();
+        gameGroups.forEach(group => {
+          if (group.playerIds && Array.isArray(group.playerIds)) {
+            group.playerIds.forEach(id => allPlayerIds.add(id));
+          } else if (group.players && Array.isArray(group.players)) {
+            group.players.forEach(player => {
+              if (typeof player === 'object' && player.playerId) {
+                allPlayerIds.add(player.playerId);
+              } else if (typeof player === 'string') {
+                allPlayerIds.add(player);
+              }
+            });
+          }
+        });
+        
+        console.log(`Total players across all groups: ${allPlayerIds.size}`);
+        
+        // Prepare player data for all players
+        const allPlayersData = [];
+        const allScores = {};
+        const allHandicaps = {};
+        
+        // Process all players in the game
+        for (const playerId of allPlayerIds) {
+          const playerData = allPlayers.find(p => p.id === playerId);
+          if (playerData) {
+            // Add player to calculation data
+            allPlayersData.push({
+              id: playerData.id,
+              name: playerData.name,
+              courseHandicap: handicaps[playerData.id] || playerData.handicap || 0
+            });
+            
+            // Initialize handicap from stored player data if not already set
+            if (!allHandicaps[playerData.id]) {
+              allHandicaps[playerData.id] = playerData.handicap || 0;
+            }
+            
+            // Initialize empty scores object for this player
+            if (!allScores[playerData.id]) {
+              allScores[playerData.id] = {};
+            }
+          }
+        }
+        
+        // Load scores from all groups if available
+        if (game.scores && game.scores.raw) {
+          game.scores.raw.forEach(playerScore => {
+            if (allPlayerIds.has(playerScore.playerId)) {
+              allScores[playerScore.playerId] = playerScore.holes || {};
+            }
+          });
+        }
+        
+        // Merge current group's scores which might be more up-to-date
+        for (const playerId in scores) {
+          if (allScores[playerId]) {
+            allScores[playerId] = {...allScores[playerId], ...scores[playerId]};
+          } else {
+            allScores[playerId] = {...scores[playerId]};
+          }
+        }
+        
+        // Prepare hole data
+        const holeData = monarchDunesData.par.map((par, index) => ({
+          par,
+          strokeIndex: monarchDunesData.strokeIndex[index]
+        }));
+        
+        console.log(`Calculating skins for ${allPlayersData.length} players across all groups`);
+        
+        // Calculate skins results for ALL players
+        const results = calculateGameSkins(allPlayersData, holeData, allScores);
+        setCalculatedResults(results);
+      } catch (error) {
+        console.error("Error calculating game-wide skins:", error);
+      }
+    };
     
-    // Prepare hole data
-    const holeData = monarchDunesData.par.map((par, index) => ({
-      par,
-      strokeIndex: monarchDunesData.strokeIndex[index]
-    }));
+    // Execute the function to get all player data
+    fetchAllPlayersAndScores();
     
-    // Calculate skins results
-    const results = calculateGameSkins(playersData, holeData, scores);
-    setCalculatedResults(results);
   }, [game, players, scores, handicaps, ctpPlayer]);
   
   // Update a player's score for the current hole
@@ -620,13 +699,74 @@ const ScoreCardPage = () => {
         >
           Back
         </button>
-        <button 
-          className="primary-btn"
-          onClick={saveScores}
-          disabled={saving}
-        >
-          {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Scores'}
-        </button>
+        <div className="actions-container">
+          <button 
+            className="primary-btn"
+            onClick={saveScores}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Scores'}
+          </button>
+          
+          {/* Only show finalize button if all holes are complete and not already finalized */}
+          {completedHolesCount() === 18 && (!game.status || game.status !== 'completed') && (
+            <button 
+              className="btn-success finalize-btn"
+              onClick={async () => {
+                try {
+                  setSaving(true);
+                  
+                  // Get latest game data
+                  const gamesData = await dataSync.getGames();
+                  const currentGame = gamesData.find(g => g.id === gameId);
+                  
+                  if (!currentGame) {
+                    setError('Game not found');
+                    setSaving(false);
+                    return;
+                  }
+                  
+                  // Update the game status
+                  const updatedGame = {
+                    ...currentGame,
+                    status: 'completed',
+                    completedDate: new Date().toISOString(),
+                    scores: {
+                      ...currentGame.scores,
+                      calculated: calculatedResults
+                    }
+                  };
+                  
+                  // Save the updated game
+                  await dataSync.updateGame(updatedGame);
+                  
+                  // Update local state
+                  setGame(updatedGame);
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 2000);
+                  
+                  // Display a success message
+                  alert('Game has been finalized successfully! Results are now available in Game History.');
+                  
+                } catch (err) {
+                  console.error('Error finalizing game:', err);
+                  setError('Failed to finalize game. Please try again.');
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              Finalize Game
+            </button>
+          )}
+          
+          {/* Show a message if the game is already finalized */}
+          {game.status === 'completed' && (
+            <div className="game-finalized-message">
+              <i className="fas fa-check-circle"></i> Game Finalized
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
