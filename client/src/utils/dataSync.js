@@ -589,6 +589,27 @@ class DataSyncService {
       await this.initialize();
     }
   }
+
+  /**
+   * Get the current user information from localStorage
+   * Used for determining if the current user is a scorekeeper, etc.
+   */
+  getCurrentUser() {
+    // Safety check for SSR/browser environment
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+    
+    try {
+      const userData = localStorage.getItem('golfSkinsUser');
+      if (!userData) return null;
+      
+      return JSON.parse(userData);
+    } catch (error) {
+      console.error('Error retrieving current user data:', error);
+      return null;
+    }
+  }
 }
 
 const dataSync = new DataSyncService();

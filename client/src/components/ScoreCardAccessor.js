@@ -88,13 +88,30 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
       ) : (
         <div className="scorekeeper-info">
           <div>Scorekeeper: <strong>{scorekeeperInfo?.name || 'Not assigned'}</strong></div>
-          <button 
-            className="btn btn-secondary copy-link-btn"
-            onClick={copyLinkToClipboard}
-            disabled={!group.scorekeeperId}
-          >
-            {linkCopied ? 'Link Copied!' : 'Copy Scorecard Link'}
-          </button>
+          
+          {group.scorekeeperId && (
+            <div className="scorekeeper-instructions">
+              <p>Share this link with the assigned scorekeeper:</p>
+              <div className="scorecard-link-display">
+                <code>{getScorecardLink()}</code>
+              </div>
+              <p className="login-code-info">
+                <strong>Important:</strong> Scorekeeper will need this login code: <code>{`${gameId}-${groupIndex}`}</code>
+              </p>
+              <button 
+                className="btn btn-secondary copy-link-btn"
+                onClick={copyLinkToClipboard}
+              >
+                {linkCopied ? 'Link Copied to Clipboard! ✓' : 'Copy Link to Clipboard'}
+              </button>
+            </div>
+          )}
+          
+          {!group.scorekeeperId && (
+            <div className="no-scorekeeper-warning">
+              <p>No scorekeeper assigned. Please select a scorekeeper to enable score entry.</p>
+            </div>
+          )}
         </div>
       )}
     </div>

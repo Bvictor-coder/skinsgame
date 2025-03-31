@@ -327,44 +327,35 @@ const PairingsAndGroups = () => {
       setError('');
       setSuccess('');
       
-      // Get all games from localStorage
-      const storedData = JSON.parse(localStorage.getItem('golfSkinsOrganizer') || '{}');
-      const currentGames = storedData.games || [];
+      // Prepare playerIds array for each group
+      const formattedGroups = groups.map(group => {
+        // Convert player objects to just playerIds array
+        return {
+          id: group.id,
+          playerIds: group.players.map(player => player.playerId),
+          startingHole: group.startingHole,
+          startingPosition: group.startingPosition,
+          scorekeeperId: group.scorekeeperId
+        };
+      });
       
-      // Find the game to update
-      const gameIndex = currentGames.findIndex(g => g.id === selectedGame.id);
-      if (gameIndex === -1) {
-        setError('Game not found');
-        setLoading(false);
-        return;
-      }
-      
-      // Update game with groups
-      currentGames[gameIndex] = {
-        ...currentGames[gameIndex],
-        groups: groups
+      // Create updated game object
+      const updatedGame = {
+        ...selectedGame,
+        groups: formattedGroups
       };
       
-      // Update localStorage
-      localStorage.setItem('golfSkinsOrganizer', JSON.stringify({
-        ...storedData,
-        games: currentGames
-      }));
+      // Use dataSync service to update the game
+      await dataSync.updateGame(selectedGame.id, updatedGame);
       
       // Update selected game in state
-      setSelectedGame({
-        ...selectedGame,
-        groups: groups
-      });
+      setSelectedGame(updatedGame);
       
       // Update games list
       setGames(prevGames => {
         return prevGames.map(game => {
           if (game.id === selectedGame.id) {
-            return {
-              ...game,
-              groups: groups
-            };
+            return updatedGame;
           }
           return game;
         });

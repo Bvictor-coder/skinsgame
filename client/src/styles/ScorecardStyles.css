@@ -1,118 +1,100 @@
 /* Scorecard Styles */
 
-/* Basic layout */
 .scorecard-container {
-  display: flex;
-  flex-direction: column;
-  max-width: 100%;
-  background-color: #f5f5f5;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Header */
 .scorecard-header {
-  background-color: #2e7d32;
-  color: white;
-  padding: 15px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .scorecard-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  color: #006633;
 }
 
-.scorecard-header p {
-  margin: 5px 0 0;
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-/* Game info section */
 .game-info {
-  background-color: white;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.game-info p {
-  margin: 5px 0;
-  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  font-size: 14px;
+  background-color: #e8f4f8;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .group-name {
   font-weight: bold;
-  color: #2e7d32;
 }
 
-/* Scorekeeper controls */
 .scorekeeper-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #e8f5e9;
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
-}
-
-.scorekeeper-badge {
-  background-color: #2e7d32;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  margin-bottom: 20px;
+  background-color: #eaf6ea;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .scorekeeper-info {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
 }
 
-/* Handicap entry section */
-.handicap-entry {
-  background-color: white;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #ddd;
+.scorekeeper-badge {
+  font-weight: bold;
+  color: #006633;
 }
 
-.handicap-entry h3 {
-  margin: 0 0 10px;
-  font-size: 1.1rem;
+.view-toggle-btn {
+  background-color: #006633;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.handicap-player {
+.view-toggle-btn:hover {
+  background-color: #005025;
+}
+
+/* Hole completion indicator */
+.hole-completion-indicator {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.hole-indicator {
+  width: 30px;
+  height: 30px;
+  display: flex;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.handicap-player:last-child {
-  border-bottom: none;
-}
-
-.player-name {
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  font-size: 12px;
   font-weight: bold;
 }
 
-.handicap-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 120px;
+.hole-indicator.complete {
+  background-color: #4caf50;
+  color: white;
 }
 
-.handicap-input input {
-  width: 50px;
-  padding: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
+.hole-indicator.current {
+  border: 2px solid #006633;
+  background-color: #ffffff;
 }
 
 /* Hole navigator */
@@ -120,87 +102,78 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: white;
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .hole-number {
-  font-size: 1.2rem;
+  font-size: 18px;
   font-weight: bold;
 }
 
 .hole-nav-buttons {
   display: flex;
-  gap: 5px;
+  gap: 10px;
 }
 
 .hole-nav-buttons button {
-  background-color: #e8f5e9;
-  border: none;
   padding: 5px 10px;
+  background-color: #006633;
+  color: white;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
 .hole-nav-buttons button:disabled {
-  opacity: 0.5;
+  background-color: #cccccc;
   cursor: not-allowed;
 }
 
 /* Hole information */
 .hole-info {
   display: flex;
-  justify-content: space-between;
-  background-color: #f9f9f9;
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  background-color: #e8f4f8;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .hole-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
 }
 
 .hole-stat-label {
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 12px;
+  margin-bottom: 2px;
 }
 
 .hole-stat-value {
+  font-size: 16px;
   font-weight: bold;
-  font-size: 1.1rem;
 }
 
 /* Score entry */
 .score-entry {
-  background-color: white;
-  padding: 0;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .player-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.player-row:last-child {
-  border-bottom: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .player-details {
-  display: flex;
-  flex-direction: column;
+  flex: 1;
 }
 
 .player-row-name {
@@ -208,359 +181,319 @@
 }
 
 .player-handicap {
-  font-size: 0.8rem;
+  font-size: 12px;
   color: #666;
 }
 
 .score-controls {
   display: flex;
   align-items: center;
-  gap: 5px;
-}
-
-.score-display {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  font-weight: bold;
+  gap: 10px;
 }
 
 .score-btn {
   width: 30px;
   height: 30px;
+  border-radius: 50%;
   border: none;
-  background-color: #e8f5e9;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 1.2rem;
+  background-color: #006633;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .score-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background-color: #cccccc;
 }
 
-/* Mobile number picker overlay */
-.mobile-number-picker {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  animation: slide-up 0.3s ease;
-  padding-bottom: 20px; /* Safe area for bottom navigation */
-}
-
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.picker-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.picker-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.close-picker {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-}
-
-.picker-value {
-  padding: 10px 15px;
+.score-display {
+  width: 30px;
   text-align: center;
-  font-size: 1.1rem;
-}
-
-.picker-buttons {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  padding: 0 15px;
-}
-
-.picker-button {
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 8px;
-  padding: 15px 0;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-.picker-button.active {
-  background-color: #2e7d32;
-  color: white;
   font-weight: bold;
-}
-
-.picker-button.clear {
-  grid-column: span 2;
-  background-color: #ffebee;
-}
-
-.picker-button.done {
-  grid-column: span 3;
-  background-color: #e8f5e9;
-  font-weight: bold;
+  font-size: 18px;
 }
 
 /* Results section */
 .results-section {
-  background-color: white;
   padding: 15px;
-  margin-bottom: 60px; /* Space for bottom navigation */
-}
-
-.results-section h3 {
-  margin: 0 0 15px;
-  font-size: 1.1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .results-tabs {
   display: flex;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .results-tab {
-  padding: 8px 15px;
-  background: none;
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background-color: #f0f0f0;
   border: none;
   cursor: pointer;
-  font-weight: bold;
-  color: #666;
 }
 
 .results-tab.active {
-  color: #2e7d32;
-  border-bottom: 2px solid #2e7d32;
+  background-color: #006633;
+  color: white;
 }
 
 /* Hole results */
 .hole-results {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .hole-result-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .hole-result-header {
   display: flex;
   justify-content: space-between;
-  background-color: #f5f5f5;
-  padding: 10px 15px;
+  padding: 10px;
+  background-color: #f0f0f0;
   font-weight: bold;
 }
 
 .hole-result-winner {
-  color: #2e7d32;
+  color: #006633;
 }
 
 .hole-result-content {
-  padding: 10px 15px;
+  padding: 10px;
 }
 
 .hole-player-score {
   display: flex;
   justify-content: space-between;
   padding: 5px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.hole-player-score:last-child {
-  border-bottom: none;
 }
 
 .winner-row {
-  background-color: #e8f5e9;
   font-weight: bold;
+  color: #006633;
 }
 
 .tied-row {
-  background-color: #fff8e1;
+  font-weight: bold;
+  color: #0066cc;
 }
 
 .net-score {
   font-weight: bold;
 }
 
-/* Player results */
+/* Player summary */
 .player-results-table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 .player-results-table th,
 .player-results-table td {
-  padding: 10px;
+  padding: 8px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .player-results-table th {
-  background-color: #f5f5f5;
-  font-weight: bold;
+  background-color: #f0f0f0;
 }
 
 .winner-highlight {
-  background-color: #e8f5e9;
-  font-weight: bold;
+  background-color: #e8f4e8;
 }
 
-/* Bottom navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  display: flex;
-  border-top: 1px solid #ddd;
-  z-index: 100;
-}
-
-.bottom-nav button {
-  flex: 1;
-  padding: 15px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.bottom-nav .primary-btn {
-  background-color: #2e7d32;
-  color: white;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hole-info {
-    flex-wrap: wrap;
-  }
-  
-  .hole-stat {
-    flex: 1 0 33%;
-    margin-bottom: 10px;
-  }
-  
-  .picker-buttons {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Completion indicators */
-.hole-completion-indicator {
-  display: flex;
-  overflow-x: auto;
-  padding: 10px 15px;
-  background-color: white;
-  border-bottom: 1px solid #ddd;
-}
-
-.hole-indicator {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  margin-right: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  flex-shrink: 0;
-}
-
-.hole-indicator.complete {
-  background-color: #2e7d32;
-  color: white;
-}
-
-.hole-indicator.current {
-  border: 2px solid #2e7d32;
-  background-color: white;
-  color: #2e7d32;
-}
-
-/* CTP Entry */
+/* CTP entry */
 .ctp-entry {
-  background-color: white;
+  margin-top: 20px;
   padding: 15px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.ctp-entry h3 {
-  margin: 0 0 10px;
-  font-size: 1.1rem;
+  background-color: #e8f4f8;
+  border-radius: 4px;
 }
 
 .ctp-select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 8px;
   margin-top: 10px;
 }
 
-/* Loading state */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
+/* Handicap entry */
+.handicap-entry {
+  margin-bottom: 20px;
+}
+
+.handicap-entry h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.handicap-player {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  z-index: 9999;
+  padding: 8px;
+  background-color: #ffffff;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-left-color: #2e7d32;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
+.handicap-input input {
+  width: 60px;
+  padding: 5px;
+  text-align: center;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+/* Bottom navigation */
+.bottom-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.bottom-nav button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background-color: #006633;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #005025;
+}
+
+/* ScoreCardAccessor Component Styles */
+.scorecard-accessor {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.scorekeeper-info {
+  margin-bottom: 15px;
+}
+
+.scorekeeper-instructions {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f4f8;
+  border-radius: 8px;
+  border-left: 4px solid #006633;
+}
+
+.scorecard-link-display {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.scorecard-link-display code {
+  font-family: monospace;
+  color: #006633;
+}
+
+.login-code-info {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #fffde7;
+  border-radius: 4px;
+  border-left: 4px solid #ffab00;
+}
+
+.login-code-info code {
+  font-family: monospace;
+  background-color: #fff;
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: #e91e63;
+  border: 1px solid #e0e0e0;
+}
+
+.copy-link-btn {
+  margin-top: 10px;
+  background-color: #006633;
+  color: white;
+}
+
+.no-scorekeeper-warning {
+  padding: 10px;
+  background-color: #fff3e0;
+  border-radius: 4px;
+  border-left: 4px solid #ff9800;
+  color: #e65100;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .scorecard-container {
+    padding: 15px;
+  }
+  
+  .game-info {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .scorekeeper-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .hole-completion-indicator {
+    gap: 4px;
+  }
+  
+  .hole-indicator {
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+  }
+  
+  .hole-info {
+    flex-wrap: wrap;
+  }
+  
+  .player-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .score-controls {
+    margin-top: 10px;
+    justify-content: center;
+  }
+  
+  .bottom-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .bottom-nav button {
+    width: 100%;
+  }
+  
+  .player-results-table {
+    font-size: 14px;
   }
 }
