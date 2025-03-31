@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
-import PrintablePlayersList from './PrintablePlayersList';
 
 const WeeklySignUpManagement = () => {
-  const printableRef = useRef(null);
-  const [showPrintView, setShowPrintView] = useState(false);
   const [games, setGames] = useState([]);
   const [players, setPlayers] = useState([]);
   const [signups, setSignups] = useState({});
