@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserProvider, useUser, ROLES } from './utils/userContext';
 import Header from './components/Header';
 import PlayersManagement from './components/PlayersManagement';
+import NewGameForm from './components/NewGameForm';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
@@ -178,8 +179,7 @@ const AppContent = () => {
             <>
               {activeTab === 'new-game' && (
                 <div id="new-game">
-                  <h2>Create New Game</h2>
-                  <p className="empty-state">This tab will allow creating new games.</p>
+                  <NewGameForm />
                 </div>
               )}
               

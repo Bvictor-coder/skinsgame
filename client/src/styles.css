@@ -354,6 +354,27 @@ h3 {
     margin-bottom: 1.25rem;
 }
 
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+}
+
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
@@ -404,6 +425,12 @@ h3 {
     background-color: rgba(211, 47, 47, 0.1);
     border-left-color: var(--error-color);
     color: var(--error-color);
+}
+
+.alert-success {
+    background-color: rgba(56, 142, 60, 0.1);
+    border-left-color: var(--success-color);
+    color: var(--success-color);
 }
 
 /* Empty states */
