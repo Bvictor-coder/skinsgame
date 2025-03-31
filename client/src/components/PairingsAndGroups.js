@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
 
 const PairingsAndGroups = () => {
@@ -11,6 +11,27 @@ const PairingsAndGroups = () => {
   const [selectedGame, setSelectedGame] = useState(null);
   const [groups, setGroups] = useState([]);
   const [success, setSuccess] = useState('');
+  const [renderError, setRenderError] = useState(null);
+  const [localStorageError, setLocalStorageError] = useState(null);
+  
+  // Check localStorage availability
+  useEffect(() => {
+    try {
+      // Test localStorage
+      localStorage.setItem('testLocalStorage', 'test');
+      if (localStorage.getItem('testLocalStorage') !== 'test') {
+        throw new Error('localStorage read/write test failed');
+      }
+      localStorage.removeItem('testLocalStorage');
+      
+      // Test getting actual data
+      const storedData = localStorage.getItem('golfSkinsOrganizer');
+      console.log("LocalStorage test - has data:", !!storedData);
+    } catch (err) {
+      console.error("LocalStorage access error:", err);
+      setLocalStorageError(`LocalStorage error: ${err.message}`);
+    }
+  }, []);
 
   // Create groups from signups - wrapped in useCallback to avoid dependency issues
   const createGroups = useCallback((signupList, existingGroups) => {
@@ -431,23 +452,38 @@ const PairingsAndGroups = () => {
     printWindow.document.close();
   };
 
-  return (
-    <div className="pairings-and-groups">
-      <h2>Pairings & Groups</h2>
+  // Wrap render in try/catch to catch any rendering errors
+  const renderContent = () => {
+    try {
+      // Show any localStorage errors first
+      if (localStorageError) {
+        return (
+          <div className="error-container">
+            <h3>Storage Error</h3>
+            <p>{localStorageError}</p>
+            <p>Please try clearing your browser cache or using a different browser.</p>
+          </div>
+        );
+      }
       
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
+      // Then show any general render errors
+      if (renderError) {
+        return (
+          <div className="error-container">
+            <h3>Rendering Error</h3>
+            <p>{renderError}</p>
+            <button 
+              className="btn" 
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </button>
+          </div>
+        );
+      }
       
-      {success && (
-        <div className="alert alert-success">
-          {success}
-        </div>
-      )}
-      
-      {loading && !games.length ? (
+      // Normal component rendering
+      return loading && !games.length ? (
         <div className="loading">Loading...</div>
       ) : (
         <div className="groups-container">
@@ -561,7 +597,42 @@ const PairingsAndGroups = () => {
             )}
           </div>
         </div>
+      )
+    } catch (error) {
+      console.error("Render error:", error);
+      setRenderError(error.message);
+      return (
+        <div className="error-container">
+          <h3>Error Rendering Component</h3>
+          <p>{error.message}</p>
+          <button 
+            className="btn" 
+            onClick={() => window.location.reload()}
+          >
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+  };
+  
+  return (
+    <div className="pairings-and-groups">
+      <h2>Pairings & Groups</h2>
+      
+      {error && (
+        <div className="alert alert-error">
+          {error}
+        </div>
       )}
+      
+      {success && (
+        <div className="alert alert-success">
+          {success}
+        </div>
+      )}
+      
+      {renderContent()}
     </div>
   );
 };
