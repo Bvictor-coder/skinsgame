@@ -11,8 +11,8 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
   // Monarch Dunes course data with actual hole handicaps
   const monarchDunesData = {
     name: 'Monarch Dunes',
-    // Standard par values for each hole - update if needed
-    par: [4, 4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5],
+    // Actual par values for Monarch Dunes
+    par: [4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 4, 3, 5, 3, 5, 4, 3, 4], // Course par: 72 (Front 9: 36, Back 9: 36)
     // Handicap difficulty ratings from 1 (hardest) to 18 (easiest)
     // As provided by the course
     handicaps: [1, 15, 9, 3, 7, 11, 13, 5, 17, 2, 14, 16, 4, 1, 8, 12, 10, 6]
@@ -173,6 +173,9 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
           <li>After applying handicap strokes, the lowest net score on each hole wins the skin</li>
           <li>If multiple players tie for lowest net score, the skin carries over to the next hole</li>
         </ol>
+        
+        <h4>Course Information</h4>
+        <p>Monarch Dunes is a par 72 course (Front 9: par 36, Back 9: par 36)</p>
         <h4>Monarch Dunes Hole Handicaps</h4>
         <div className="handicap-table">
           <table>
@@ -184,6 +187,11 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <th>Par</th>
+                <td>4</td><td>3</td><td>5</td><td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td>4</td>
+                <td>4</td><td>4</td><td>3</td><td>5</td><td>3</td><td>5</td><td>4</td><td>3</td><td>4</td>
+              </tr>
               <tr>
                 <th>Difficulty</th>
                 <td>1</td><td>15</td><td>9</td><td>3</td><td>7</td><td>11</td><td>13</td><td>5</td><td>17</td>
