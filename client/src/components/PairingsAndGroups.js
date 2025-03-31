@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dataSync from '../utils/dataSync';
 
 const PairingsAndGroups = () => {
@@ -11,101 +11,8 @@ const PairingsAndGroups = () => {
   const [groups, setGroups] = useState([]);
   const [success, setSuccess] = useState('');
 
-  // Load games, players, and signups on component mount
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        
-        // Get all games
-        const gamesData = await dataSync.getGames();
-        
-        // Filter to only upcoming games (games with date >= today)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Start of today
-        
-        const upcomingGames = gamesData
-          .filter(game => {
-            const gameDate = new Date(game.date);
-            return gameDate >= today;
-          })
-          .sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        setGames(upcomingGames);
-        
-        // Select the first game by default if any exist
-        if (upcomingGames.length > 0) {
-          setSelectedGame(upcomingGames[0]);
-          
-          // Load signups for the first game
-          const gameSignups = await dataSync.getSignups(upcomingGames[0].id);
-          setSignups({ [upcomingGames[0].id]: gameSignups });
-          
-          // Get existing groups if available
-          if (upcomingGames[0].groups && upcomingGames[0].groups.length > 0) {
-            setGroups(upcomingGames[0].groups);
-          } else {
-            // Create automatic groups based on signup data
-            const autoGroups = createGroups(gameSignups, []);
-            setGroups(autoGroups);
-          }
-        }
-        
-        // Get all players
-        const playersData = await dataSync.getFriends();
-        setPlayers(playersData);
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading data:', err);
-        setError('Failed to load games and players');
-        setLoading(false);
-      }
-    };
-    
-    loadData();
-  }, []);
-
-  // Load signups when the selected game changes
-  useEffect(() => {
-    const loadSignups = async () => {
-      if (!selectedGame) return;
-      
-      try {
-        setLoading(true);
-        
-        // Load signups for selected game if not already loaded
-        if (!signups[selectedGame.id]) {
-          const gameSignups = await dataSync.getSignups(selectedGame.id);
-          setSignups(prevSignups => ({
-            ...prevSignups,
-            [selectedGame.id]: gameSignups
-          }));
-        }
-        
-        // Get existing groups if available
-        if (selectedGame.groups && selectedGame.groups.length > 0) {
-          setGroups(selectedGame.groups);
-        } else {
-          // Create automatic groups based on signup data
-          const currentSignups = signups[selectedGame.id] || [];
-          const autoGroups = createGroups(currentSignups, []);
-          setGroups(autoGroups);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading game data:', err);
-        setError('Failed to load game data');
-        setLoading(false);
-      }
-    };
-    
-    loadSignups();
-  }, [selectedGame, signups]);
-
-  // Create groups from signups
-  const createGroups = (signupList, existingGroups) => {
+  // Create groups from signups - wrapped in useCallback to avoid dependency issues
+  const createGroups = useCallback((signupList, existingGroups) => {
     if (!signupList || signupList.length === 0) return [];
     
     // Start with existing groups
@@ -185,7 +92,100 @@ const PairingsAndGroups = () => {
     }
     
     return newGroups;
-  };
+  }, [players]);
+
+  // Load games, players, and signups on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Get all games
+        const gamesData = await dataSync.getGames();
+        
+        // Filter to only upcoming games (games with date >= today)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Start of today
+        
+        const upcomingGames = gamesData
+          .filter(game => {
+            const gameDate = new Date(game.date);
+            return gameDate >= today;
+          })
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        setGames(upcomingGames);
+        
+        // Select the first game by default if any exist
+        if (upcomingGames.length > 0) {
+          setSelectedGame(upcomingGames[0]);
+          
+          // Load signups for the first game
+          const gameSignups = await dataSync.getSignups(upcomingGames[0].id);
+          setSignups({ [upcomingGames[0].id]: gameSignups });
+          
+          // Get existing groups if available
+          if (upcomingGames[0].groups && upcomingGames[0].groups.length > 0) {
+            setGroups(upcomingGames[0].groups);
+          } else {
+            // Create automatic groups based on signup data
+            const autoGroups = createGroups(gameSignups, []);
+            setGroups(autoGroups);
+          }
+        }
+        
+        // Get all players
+        const playersData = await dataSync.getFriends();
+        setPlayers(playersData);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setError('Failed to load games and players');
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [createGroups]);
+
+  // Load signups when the selected game changes
+  useEffect(() => {
+    const loadSignups = async () => {
+      if (!selectedGame) return;
+      
+      try {
+        setLoading(true);
+        
+        // Load signups for selected game if not already loaded
+        if (!signups[selectedGame.id]) {
+          const gameSignups = await dataSync.getSignups(selectedGame.id);
+          setSignups(prevSignups => ({
+            ...prevSignups,
+            [selectedGame.id]: gameSignups
+          }));
+        }
+        
+        // Get existing groups if available
+        if (selectedGame.groups && selectedGame.groups.length > 0) {
+          setGroups(selectedGame.groups);
+        } else {
+          // Create automatic groups based on signup data
+          const currentSignups = signups[selectedGame.id] || [];
+          const autoGroups = createGroups(currentSignups, []);
+          setGroups(autoGroups);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading game data:', err);
+        setError('Failed to load game data');
+        setLoading(false);
+      }
+    };
+    
+    loadSignups();
+  }, [selectedGame, signups, createGroups]);
 
   // Handle game selection
   const handleGameSelect = (game) => {
