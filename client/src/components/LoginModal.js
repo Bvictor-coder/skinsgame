@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../utils/userContext';
-import api from '../utils/api';
+import dataSync from '../utils/dataSync';
 
 const LoginModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('admin');
@@ -19,8 +19,8 @@ const LoginModal = ({ isOpen, onClose }) => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const response = await api.friends.getAll();
-        setPlayers(response.data);
+        const players = await dataSync.getFriends();
+        setPlayers(players);
       } catch (err) {
         console.error('Error loading players:', err);
       } finally {

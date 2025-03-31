@@ -67,6 +67,7 @@ const AppContent = () => {
     
     // Available to all users
     tabs.push({ id: 'upcoming', label: 'Upcoming Games' });
+    tabs.push({ id: 'grouping', label: 'Pairings & Groups' });
     tabs.push({ id: 'rules', label: 'Game Rules' });
     
     if (isAuthenticated()) {
@@ -167,6 +168,12 @@ const AppContent = () => {
           {activeTab === 'upcoming' && (
             <div id="upcoming">
               <UpcomingGames />
+            </div>
+          )}
+          
+          {activeTab === 'grouping' && (
+            <div id="grouping">
+              <PairingsAndGroups />
             </div>
           )}
           
