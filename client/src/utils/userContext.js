@@ -38,20 +38,15 @@ export const UserProvider = ({ children }) => {
     localStorage.setItem('golfSkinsUser', JSON.stringify(user));
   }, [user]);
 
-  // Login as administrator
-  const loginAsAdmin = (password) => {
-    // In a real app, this would validate against a proper auth system
-    // For now, we use a simple password check
-    if (password === process.env.REACT_APP_ADMIN_PASSWORD || password === 'admin123') {
-      setUser({
-        role: ROLES.ADMIN,
-        id: 'admin',
-        name: 'Administrator',
-        email: null
-      });
-      return true;
-    }
-    return false;
+  // Login as administrator - no password required for this app
+  const loginAsAdmin = () => {
+    setUser({
+      role: ROLES.ADMIN,
+      id: 'admin',
+      name: 'Administrator',
+      email: null
+    });
+    return true;
   };
 
   // Login as player

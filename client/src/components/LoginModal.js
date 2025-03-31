@@ -143,21 +143,9 @@ const LoginModal = ({ isOpen, onClose }) => {
         
         {/* Administrator Login */}
         <div className={`tab-content ${activeTab === 'admin' ? 'active' : ''}`}>
-          <form onSubmit={handleAdminLogin}>
-            <div className="form-group">
-              <label htmlFor="admin-password">Administrator Password</label>
-              <input 
-                type="password" 
-                id="admin-password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn">Login as Administrator</button>
-            </div>
-          </form>
+          <div className="form-actions" style={{ marginTop: '20px' }}>
+            <button onClick={handleAdminLogin} className="btn">Login as Administrator</button>
+          </div>
         </div>
         
         {/* Player Login */}

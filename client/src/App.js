@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProvider, useUser, ROLES } from './utils/userContext';
 import Header from './components/Header';
+import PlayersManagement from './components/PlayersManagement';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
@@ -198,8 +199,7 @@ const AppContent = () => {
               
               {activeTab === 'friends' && (
                 <div id="friends">
-                  <h2>Players</h2>
-                  <p className="empty-state">This tab will display player management.</p>
+                  <PlayersManagement />
                 </div>
               )}
               
