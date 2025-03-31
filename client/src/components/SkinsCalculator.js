@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import dataSync from '../utils/dataSync';
+import React, { useState, useEffect, useCallback } from 'react';
+// Import dataSync commented out as it's not currently used in this component
+// import dataSync from '../utils/dataSync';
 
 const SkinsCalculator = ({ gameId, players = [] }) => {
   const [courseData, setCourseData] = useState(null);
@@ -18,8 +19,9 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     handicaps: [1, 15, 9, 3, 7, 11, 13, 5, 17, 2, 14, 16, 4, 1, 8, 12, 10, 6]
   };
 
+  // Generate mock player scores - wrap in useCallback to fix dependency issues
   // Generate mock player scores
-  const generateMockScores = () => {
+  const generateMockScores = useCallback(() => {
     if (!players.length || !courseData) return [];
     
     const playerScores = players.map(player => {
@@ -54,7 +56,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     });
     
     return playerScores;
-  };
+  }, [courseData, players]);
 
   // Calculate skins results
   const calculateSkins = (scores) => {
@@ -109,7 +111,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     // We're always using Monarch Dunes data since that's the only course played
     setCourseData(monarchDunesData);
     setLoading(false);
-  }, []);
+  }, [monarchDunesData]); // Add monarchDunesData as dependency
 
   // Generate scores & calculate results when players or course changes
   useEffect(() => {
@@ -120,7 +122,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
       const skinsResults = calculateSkins(generatedScores);
       setResults(skinsResults);
     }
-  }, [courseData, players]);
+  }, [courseData, players, generateMockScores]); // Add generateMockScores as dependency
 
   // Generate player summary
   const generatePlayerSummary = () => {

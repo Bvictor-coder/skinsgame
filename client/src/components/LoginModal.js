@@ -4,7 +4,8 @@ import api from '../utils/api';
 
 const LoginModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('admin');
-  const [adminPassword, setAdminPassword] = useState('');
+  // We don't need password for admin login in this simplified version
+  const [adminPassword] = useState('');
   const [playerEmail, setPlayerEmail] = useState('');
   const [scorekeeperCode, setScorekeeperCode] = useState('');
   const [error, setError] = useState('');
