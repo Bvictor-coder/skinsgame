@@ -1120,7 +1120,7 @@ textarea {
         box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
     }
     
-    /* Style for mobile number picker */
+    /* Enhanced mobile number picker styles */
     .mobile-number-picker {
         display: flex;
         flex-direction: column;
@@ -1131,32 +1131,111 @@ textarea {
         background: white;
         border-top: 1px solid var(--border-color);
         z-index: 1000;
-        padding: 1rem;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.25rem;
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
     }
     
     .picker-header {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .picker-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: var(--primary-color);
+    }
+    
+    .close-picker {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .close-picker:hover {
+        background-color: var(--light-gray);
+        color: var(--error-color);
+    }
+    
+    .picker-value {
+        background-color: var(--light-gray);
+        padding: 0.75rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        text-align: center;
+        font-size: 1.1rem;
     }
     
     .picker-buttons {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 0.5rem;
+        margin-bottom: 1rem;
     }
     
     .picker-button {
-        padding: 1rem;
-        font-size: 1.2rem;
+        padding: 1rem 0.5rem;
+        font-size: 1.25rem;
         border: 1px solid var(--border-color);
-        border-radius: 4px;
+        border-radius: var(--radius);
         background: white;
+        transition: all var(--transition-fast);
+        font-weight: 500;
     }
     
-    .picker-button:active {
-        background: var(--light-green);
+    .picker-button:active, .picker-button.active {
+        background: var(--primary-bg);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        transform: scale(0.98);
+    }
+    
+    .picker-button.clear {
+        grid-column: span 2;
+        background-color: var(--light-gray);
+        color: var(--text-secondary);
+    }
+    
+    .picker-button.done {
+        grid-column: span 3;
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+    
+    .picker-button.done:active {
+        background-color: var(--primary-dark);
+    }
+    
+    /* Role-specific picker styles */
+    .role-admin .picker-button.done {
+        background-color: var(--primary-color);
+    }
+    
+    .role-player .picker-button.done {
+        background-color: var(--accent-color);
+    }
+    
+    .role-scorekeeper .picker-button.done {
+        background-color: var(--warning-color);
     }
 }
 
