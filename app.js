@@ -1576,12 +1576,21 @@ function displaySkinsResults(game, signups) {
     // Calculate totals
     const totalPot = signups.length * game.entryFee;
     const totalSkins = game.scores.skins.length;
-    const skinValue = totalSkins > 0 ? Math.round(totalPot / totalSkins) : 0;
+    
+    // Calculate skin value with precision
+    let skinValue = 0;
+    if (totalSkins > 0) {
+        // Get exact value per skin (might have decimal)
+        skinValue = totalPot / totalSkins;
+        // Round to nearest dollar for display
+        const roundedSkinValue = Math.round(skinValue);
+        // Update display with rounded value
+        skinValueDisplay.textContent = roundedSkinValue;
+    }
     
     // Display totals
     totalPotDisplay.textContent = totalPot;
     totalSkinsDisplay.textContent = totalSkins;
-    skinValueDisplay.textContent = skinValue;
     
     // Display skins by hole
     skinsByHoleContainer.innerHTML = '';
@@ -1636,6 +1645,9 @@ function displaySkinsResults(game, signups) {
     if (totalSkins > 0) {
         // Calculate payouts by player
         const payouts = {};
+        let totalCalculatedPayout = 0;
+        
+        // First pass: count skins per player
         game.scores.skins.forEach(skin => {
             if (!payouts[skin.playerId]) {
                 payouts[skin.playerId] = {
@@ -1644,8 +1656,42 @@ function displaySkinsResults(game, signups) {
                 };
             }
             payouts[skin.playerId].count++;
-            payouts[skin.playerId].amount += skinValue;
         });
+        
+        // Second pass: calculate exact amounts
+        Object.entries(payouts).forEach(([playerId, payout]) => {
+            // Calculate exact amount (not rounded yet)
+            payout.amount = payout.count * skinValue;
+            // Track total calculated payout
+            totalCalculatedPayout += payout.amount;
+        });
+        
+        // Adjust if total exceeds pot (due to rounding)
+        if (totalCalculatedPayout > totalPot) {
+            // Proportionally reduce each player's payout
+            const adjustment = totalPot / totalCalculatedPayout;
+            Object.values(payouts).forEach(payout => {
+                payout.amount = Math.floor(payout.amount * adjustment);
+            });
+            
+            // Distribute any remaining cents to players with most skins
+            const sortedPlayers = Object.entries(payouts)
+                .sort((a, b) => b[1].count - a[1].count);
+            
+            // Recalculate actual total after flooring values
+            const actualTotal = Object.values(payouts)
+                .reduce((sum, payout) => sum + payout.amount, 0);
+            
+            // Distribute remaining amount (if any)
+            let remaining = totalPot - actualTotal;
+            let index = 0;
+            
+            while (remaining > 0 && index < sortedPlayers.length) {
+                sortedPlayers[index][1].amount += 1;
+                remaining -= 1;
+                index = (index + 1) % sortedPlayers.length;
+            }
+        }
         
         // Create payouts list
         const payoutsList = document.createElement('ul');
