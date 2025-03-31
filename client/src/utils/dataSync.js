@@ -45,20 +45,25 @@ class DataSyncService {
   }
 
   /**
-   * Load data from localStorage
+   * Load data from localStorage with safety checks for SSR environments
    */
   loadFromLocalStorage() {
     try {
-      const savedData = localStorage.getItem(this.localStorageKey);
-      if (savedData) {
-        this.localData = JSON.parse(savedData);
-        
-        // Ensure proper structure
-        if (!this.localData.friends) this.localData.friends = [];
-        if (!this.localData.games) this.localData.games = [];
-        if (!this.localData.signups) this.localData.signups = {};
-        
-        console.log('Data loaded from localStorage');
+      // Check if localStorage is available (this prevents SSR errors)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedData = localStorage.getItem(this.localStorageKey);
+        if (savedData) {
+          this.localData = JSON.parse(savedData);
+          
+          // Ensure proper structure
+          if (!this.localData.friends) this.localData.friends = [];
+          if (!this.localData.games) this.localData.games = [];
+          if (!this.localData.signups) this.localData.signups = {};
+          
+          console.log('Data loaded from localStorage');
+        }
+      } else {
+        console.log('localStorage not available, using default data structure');
       }
     } catch (error) {
       console.error('Error loading data from localStorage:', error);
@@ -66,12 +71,17 @@ class DataSyncService {
   }
 
   /**
-   * Save data to localStorage
+   * Save data to localStorage with safety checks for SSR environments
    */
   saveToLocalStorage() {
     try {
-      localStorage.setItem(this.localStorageKey, JSON.stringify(this.localData));
-      console.log('Data saved to localStorage');
+      // Check if localStorage is available (this prevents SSR errors)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.localData));
+        console.log('Data saved to localStorage');
+      } else {
+        console.log('localStorage not available, data not saved');
+      }
     } catch (error) {
       console.error('Error saving data to localStorage:', error);
     }

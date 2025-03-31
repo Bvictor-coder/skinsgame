@@ -22,20 +22,39 @@ export const useUser = () => {
 
 // User provider component
 export const UserProvider = ({ children }) => {
-  // Initialize state from localStorage if available
+  // Initialize state from localStorage if available, with safety checks for SSR
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('golfSkinsUser');
-    return savedUser ? JSON.parse(savedUser) : { 
+    // Default user state
+    const defaultUser = {
       role: ROLES.GUEST,
       id: null,
       name: null,
       email: null,
     };
+    
+    // Check if we're in a browser environment before accessing localStorage
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return defaultUser;
+    }
+    
+    try {
+      const savedUser = localStorage.getItem('golfSkinsUser');
+      return savedUser ? JSON.parse(savedUser) : defaultUser;
+    } catch (error) {
+      console.error('Error reading user from localStorage:', error);
+      return defaultUser;
+    }
   });
 
-  // Save user state to localStorage whenever it changes
+  // Save user state to localStorage whenever it changes, with safety checks for SSR
   useEffect(() => {
-    localStorage.setItem('golfSkinsUser', JSON.stringify(user));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.setItem('golfSkinsUser', JSON.stringify(user));
+      } catch (error) {
+        console.error('Error saving user to localStorage:', error);
+      }
+    }
   }, [user]);
 
   // Login as administrator - no password required for this app

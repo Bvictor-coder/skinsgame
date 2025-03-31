@@ -39,6 +39,10 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
   
   // Generate a direct link to the scorecard page
   const getScorecardLink = () => {
+    // Add safety check for SSR environments
+    if (typeof window === 'undefined') {
+      return `/scorecard/${gameId}/${groupIndex}`;
+    }
     const baseUrl = window.location.origin;
     return `${baseUrl}/scorecard/${gameId}/${groupIndex}`;
   };
@@ -46,14 +50,25 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
   // Copy the scorecard link to clipboard
   const copyLinkToClipboard = () => {
     const link = getScorecardLink();
-    navigator.clipboard.writeText(link)
-      .then(() => {
-        setLinkCopied(true);
-        setTimeout(() => setLinkCopied(false), 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy link:', err);
-      });
+    
+    // Add safety check for clipboard API
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(link)
+        .then(() => {
+          setLinkCopied(true);
+          setTimeout(() => setLinkCopied(false), 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy link:', err);
+        });
+    } else {
+      // Fallback for browsers without clipboard API
+      console.error('Clipboard API not available');
+      
+      // Still set copied state briefly to provide user feedback
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
   };
   
   // Navigate directly to the scorecard
