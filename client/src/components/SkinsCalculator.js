@@ -6,8 +6,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
   const [courseData, setCourseData] = useState(null);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Define error state but we don't need the setter currently - keeping for future use
-  const [, setError] = useState('');
+  // Removed error state since it's not being used
   const [results, setResults] = useState([]);
 
   // Wrap the constant data in useMemo to prevent it from causing re-renders
