@@ -11,9 +11,11 @@ import PlayerSignUp from './components/PlayerSignUp';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
-// Import the simplified component (commented out by default)
-// Uncomment the next line to use the simplified version for debugging
-// import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
+// Import the simplified component for debugging
+import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
+
+// Set this to true to use the simplified version for debugging
+const USE_SIMPLIFIED_GROUPS = false;
 
 // Main application component that handles role-based views
 const AppContent = () => {
@@ -202,12 +204,12 @@ const AppContent = () => {
       {activeTab === 'grouping' && (
         <div id="grouping">
           {console.log("Rendering PairingsAndGroups in admin section")}
-          {/* Wrap in ErrorBoundary for production */}
-          <PairingsAndGroups />
-          
-          {/* Uncomment this to use a simplified version for debugging
-          <SimplePairingsAndGroups />
-          */}
+          {/* Use the simplified component or the full one based on the flag */}
+          {USE_SIMPLIFIED_GROUPS ? (
+            <SimplePairingsAndGroups />
+          ) : (
+            <PairingsAndGroups />
+          )}
         </div>
       )}
               

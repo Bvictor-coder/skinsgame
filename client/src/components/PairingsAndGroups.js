@@ -482,19 +482,22 @@ const PairingsAndGroups = () => {
         );
       }
       
+      // Safe check for games array
+      const safeGames = Array.isArray(games) ? games : [];
+      
       // Normal component rendering
-      return loading && !games.length ? (
+      return loading && !safeGames.length ? (
         <div className="loading">Loading...</div>
       ) : (
         <div className="groups-container">
           {/* Games sidebar */}
           <div className="games-sidebar">
             <h3>Upcoming Games</h3>
-            {games.length === 0 ? (
+            {safeGames.length === 0 ? (
               <p className="empty-state">No upcoming games found</p>
             ) : (
               <ul className="game-list">
-                {games.map(game => (
+                {safeGames.map(game => (
                   <li 
                     key={game.id}
                     className={`game-item ${selectedGame && selectedGame.id === game.id ? 'active' : ''}`}
@@ -556,7 +559,7 @@ const PairingsAndGroups = () => {
                   
                   {getActiveSignups().length === 0 ? (
                     <p className="empty-state">No players have signed up for this game yet</p>
-                  ) : groups.length === 0 ? (
+                  ) : !Array.isArray(groups) || groups.length === 0 ? (
                     <p className="empty-state">Click "Generate Groups" to create player groups</p>
                   ) : (
                     <div className="groups-list">
@@ -572,16 +575,25 @@ const PairingsAndGroups = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {group.players.map(player => {
-                                const playerDetail = players.find(p => p.id === player.playerId);
+                              {Array.isArray(group.players) ? group.players.map(player => {
+                                // Safety check to ensure player is a valid object
+                                if (!player || typeof player !== 'object') return null;
+                                
+                                const playerDetail = Array.isArray(players) ? 
+                                  players.find(p => p && p.id === player.playerId) : null;
+                                  
+                                const playerId = player.playerId || 'unknown-player';
+                                
                                 return (
-                                  <tr key={player.playerId}>
+                                  <tr key={playerId}>
                                     <td>{playerDetail ? playerDetail.name : 'Unknown Player'}</td>
                                     <td>{playerDetail ? playerDetail.handicap : '-'}</td>
                                     <td>{player.wolf ? 'Yes' : 'No'}</td>
                                   </tr>
                                 );
-                              })}
+                              }) : (
+                                <tr><td colSpan="3">No players in this group</td></tr>
+                              )}
                             </tbody>
                           </table>
                         </div>
