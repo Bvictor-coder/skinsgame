@@ -48,7 +48,8 @@ const Header = () => {
     <header className="app-header">
       <div className="header-content">
         <div className="logo">
-          <h1>Golf Skins Game Organizer</h1>
+          <h1>Fairway Fortune</h1>
+          <p className="tagline">The Ultimate Skins Game Experience</p>
         </div>
         
         <div className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

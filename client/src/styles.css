@@ -1,61 +1,41 @@
+/* Leroy Neiman-inspired vibrant styling */
+
 :root {
-    /* Primary Color Palette */
-    --primary-color: #2e7d32;
-    --primary-dark: #1b5e20;
-    --primary-light: #4caf50;
-    --primary-bg: #e8f5e9;
+    /* Admin (green/gold) */
+    --admin-primary: #007c3e;
+    --admin-secondary: #f9a826;
+    --admin-light: #e0f7ea;
+    --admin-dark: #003918;
+    --admin-bg: linear-gradient(135deg, rgba(0,124,62,0.9), rgba(0,57,24,0.97));
     
-    /* Secondary/Accent Colors */
-    --accent-color: #1976d2;
-    --accent-dark: #0d47a1;
-    --accent-light: #42a5f5;
-    --accent-bg: #e3f2fd;
+    /* Player (blue/orange) */
+    --player-primary: #0057b8;
+    --player-secondary: #ff6b35;
+    --player-light: #e0f1ff;
+    --player-dark: #00285a;
+    --player-bg: linear-gradient(135deg, rgba(0,87,184,0.9), rgba(0,40,90,0.97));
     
-    /* Neutral Colors */
+    /* Scorekeeper (purple/teal) */
+    --score-primary: #5e35b1;
+    --score-secondary: #00b0a6;
+    --score-light: #f1e7fe;
+    --score-dark: #301b70;
+    --score-bg: linear-gradient(135deg, rgba(94,53,177,0.9), rgba(48,27,112,0.97));
+    
+    /* Dynamic colors - will change based on role */
+    --primary-color: var(--admin-primary);
+    --secondary-color: var(--admin-secondary);
+    --header-bg: var(--admin-bg);
+    
+    /* Base colors */
     --text-color: #263238;
-    --text-secondary: #546e7a;
-    --background: #ffffff;
     --light-gray: #f5f5f5;
-    --border-color: #e0e0e0;
-    
-    /* Wolf Game Colors */
-    --wolf-color: var(--accent-color);
-    --wolf-light: var(--accent-bg);
-    
-    /* Status Colors */
-    --error-color: #f44336;
-    --error-light: #ffebee;
-    --success-color: #4caf50;
-    --success-light: #e8f5e9;
-    --warning-color: #ff9800;
-    --warning-light: #fff3e0;
+    --background: #ffffff;
     
     /* Effects */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
-    
-    /* Transitions */
-    --transition-fast: 0.15s ease-in-out;
-    --transition: 0.25s ease-in-out;
-    
-    /* Spacing */
-    --space-xs: 0.25rem;
-    --space-sm: 0.5rem;
-    --space-md: 1rem;
-    --space-lg: 1.5rem;
-    --space-xl: 2rem;
-    
-    /* Border Radius */
-    --radius-sm: 4px;
+    --shadow: 0 2px 6px rgba(0,0,0,0.12);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
     --radius: 8px;
-    --radius-lg: 12px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -63,35 +43,120 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--light-gray);
-    transition: background-color var(--transition);
+    margin: 0;
+    padding: 0;
 }
 
+/* Role-specific styling */
+.role-admin {
+    --primary-color: var(--admin-primary);
+    --secondary-color: var(--admin-secondary);
+    --header-bg: var(--admin-bg);
+}
+
+.role-player {
+    --primary-color: var(--player-primary);
+    --secondary-color: var(--player-secondary);
+    --header-bg: var(--player-bg);
+}
+
+.role-scorekeeper {
+    --primary-color: var(--score-primary);
+    --secondary-color: var(--score-secondary);
+    --header-bg: var(--score-bg);
+}
+
+/* Header */
 header {
-    background-color: var(--primary-color);
-    background-image: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: var(--header-bg);
     color: white;
-    text-align: center;
-    padding: 1.5rem 0;
-    box-shadow: var(--shadow);
+    padding: 0;
+    box-shadow: var(--shadow-lg);
     position: relative;
     z-index: 10;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-dasharray="5,5"/></svg>');
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 header h1 {
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.25rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    position: relative;
+    display: inline-block;
+}
+
+header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40%;
+    height: 3px;
+    background-color: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.tagline {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-style: italic;
+    letter-spacing: 0.5px;
+}
+
+.user-role {
+    padding: 0.35rem 0.8rem;
+    background-color: rgba(255,255,255,0.15);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
-header p {
-    opacity: 0.9;
-    font-size: 0.95rem;
+.role-admin .user-role {
+    background-color: var(--admin-secondary);
+    color: var(--admin-dark);
 }
 
+.role-player .user-role {
+    background-color: var(--player-secondary);
+    color: var(--player-dark);
+}
+
+.role-scorekeeper .user-role {
+    background-color: var(--score-secondary);
+    color: var(--score-dark);
+}
+
+/* Main content */
 main {
     max-width: 1100px;
     margin: 0 auto;
-    padding: var(--space-xl);
+    padding: 2rem;
     background-color: var(--background);
     min-height: calc(100vh - 150px);
     box-shadow: var(--shadow);
@@ -100,47 +165,26 @@ main {
     position: relative;
 }
 
-footer {
-    text-align: center;
-    padding: var(--space-md);
-    background-color: var(--primary-dark);
-    color: white;
-}
-
 /* Tab Navigation */
 .tabs {
     display: flex;
-    margin-bottom: var(--space-xl);
+    margin-bottom: 2rem;
     border-bottom: 2px solid var(--light-gray);
     flex-wrap: wrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar in Firefox */
-    gap: var(--space-xs);
-}
-
-.tabs::-webkit-scrollbar {
-    display: none; /* Hide scrollbar in Chrome/Safari */
+    gap: 0.25rem;
+    position: relative;
 }
 
 .tab-btn {
     background: none;
     border: none;
-    padding: var(--space-md) var(--space-lg);
+    padding: 1rem 1.5rem;
     cursor: pointer;
     font-size: 0.95rem;
     color: var(--text-secondary);
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-    flex-shrink: 0;
     border-radius: var(--radius) var(--radius) 0 0;
     position: relative;
     font-weight: 500;
-}
-
-.tab-btn:hover {
-    color: var(--primary-color);
-    background-color: var(--primary-bg);
 }
 
 .tab-btn.active {
@@ -157,127 +201,67 @@ footer {
     height: 3px;
     background-color: var(--primary-color);
     border-radius: var(--radius) var(--radius) 0 0;
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Role-specific tab styling */
 .role-admin .tab-btn.active::after {
-    background-color: var(--primary-color);
+    background-color: var(--admin-primary);
 }
 
 .role-player .tab-btn.active::after {
-    background-color: var(--accent-color);
+    background-color: var(--player-primary);
 }
 
 .role-scorekeeper .tab-btn.active::after {
-    background-color: var(--warning-color);
-}
-
-/* Tab Content */
-.tab-content {
-    display: none;
-    padding: var(--space-md) 0;
-    animation: fadeIn var(--transition-fast);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.tab-content.active {
-    display: block;
+    background-color: var(--score-primary);
 }
 
 /* Typography */
 h2 {
-    margin-bottom: var(--space-lg);
+    margin-bottom: 1.5rem;
     color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-bg);
-    padding-bottom: var(--space-sm);
-    font-weight: 600;
-    font-size: 1.75rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.85rem;
+    position: relative;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
 }
 
-h3 {
-    margin: var(--space-lg) 0 var(--space-md);
-    color: var(--primary-color);
-    font-weight: 600;
-    font-size: 1.35rem;
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background-color: var(--secondary-color);
+    border-radius: var(--radius);
 }
 
-h4 {
-    margin: var(--space-md) 0 var(--space-sm);
-    color: var(--text-color);
-    font-weight: 600;
-    font-size: 1.15rem;
-}
-
-/* Role-specific headings */
 .role-admin h2 {
-    color: var(--primary-color);
+    color: var(--admin-primary);
+}
+
+.role-admin h2::after {
+    background-color: var(--admin-secondary);
 }
 
 .role-player h2 {
-    color: var(--accent-color);
+    color: var(--player-primary);
+}
+
+.role-player h2::after {
+    background-color: var(--player-secondary);
 }
 
 .role-scorekeeper h2 {
-    color: var(--warning-color);
+    color: var(--score-primary);
 }
 
-/* Forms */
-.form-group {
-    margin-bottom: var(--space-lg);
-}
-
-.form-group.inline {
-    display: flex;
-    gap: var(--space-lg);
-}
-
-.form-actions {
-    margin-top: var(--space-xl);
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-md);
-}
-
-label {
-    display: block;
-    margin-bottom: var(--space-sm);
-    font-weight: 500;
-    color: var(--text-color);
-}
-
-input, textarea, select {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    transition: border var(--transition-fast), box-shadow var(--transition-fast);
-    color: var(--text-color);
-}
-
-input:hover, textarea:hover, select:hover {
-    border-color: #b0bec5;
-}
-
-input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
-}
-
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.hint {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-top: var(--space-xs);
+.role-scorekeeper h2::after {
+    background-color: var(--score-secondary);
 }
 
 /* Buttons */
@@ -285,1021 +269,64 @@ textarea {
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.7rem 1.5rem;
+    padding: 0.8rem 1.75rem;
     font-size: 1rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
-    margin-right: var(--space-sm);
-    margin-bottom: var(--space-sm);
-    touch-action: manipulation; /* Better touch response */
-    font-weight: 500;
-    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+    box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
-}
-
-.btn::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn:hover {
     background-color: var(--primary-dark);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
-.btn:hover::after {
-    opacity: 1;
-}
-
-.btn:active {
-    transform: translateY(1px);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn.secondary {
-    background-color: #78909c;
-}
-
-.btn.secondary:hover {
-    background-color: #546e7a;
-}
-
-.btn.small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-}
-
-/* Role-specific buttons */
 .role-admin .btn {
-    background-color: var(--primary-color);
-}
-
-.role-admin .btn:hover {
-    background-color: var(--primary-dark);
+    background-image: linear-gradient(135deg, var(--admin-primary), var(--admin-dark));
 }
 
 .role-player .btn {
-    background-color: var(--accent-color);
-}
-
-.role-player .btn:hover {
-    background-color: var(--accent-dark);
+    background-image: linear-gradient(135deg, var(--player-primary), var(--player-dark));
 }
 
 .role-scorekeeper .btn {
-    background-color: var(--warning-color);
+    background-image: linear-gradient(135deg, var(--score-primary), var(--score-dark));
 }
 
-.role-scorekeeper .btn:hover {
-    background-color: #f57c00;
-}
-
+/* Empty states */
 .empty-state {
     text-align: center;
-    color: #999;
     padding: 2rem;
     background-color: var(--light-gray);
     border-radius: 8px;
-}
-
-/* Card Styles */
-.game-card, .friend-card, .participant-card, .signup-card, .group-card {
-    background-color: var(--background);
-    padding: var(--space-lg);
-    margin-bottom: var(--space-lg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border-left: 4px solid var(--primary-color);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     position: relative;
-    overflow: hidden;
 }
 
-.game-card:hover, .friend-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+.role-admin .empty-state {
+    background-image: linear-gradient(135deg, var(--admin-light), #f9f9f9);
+    border: 1px dashed var(--admin-primary);
 }
 
-.game-card h3 {
-    margin-top: 0;
-    color: var(--primary-color);
-    font-weight: 600;
-    font-size: 1.25rem;
-    margin-bottom: var(--space-sm);
+.role-player .empty-state {
+    background-image: linear-gradient(135deg, var(--player-light), #f9f9f9);
+    border: 1px dashed var(--player-primary);
 }
 
-.game-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md) var(--space-lg);
-    margin: var(--space-sm) 0 var(--space-md);
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+.role-scorekeeper .empty-state {
+    background-image: linear-gradient(135deg, var(--score-light), #f9f9f9);
+    border: 1px dashed var(--score-primary);
 }
 
-.game-meta i {
-    color: var(--primary-color);
-    margin-right: var(--space-xs);
-    width: 18px;
+/* Footer */
+footer {
     text-align: center;
-}
-
-.game-meta .badge {
-    display: inline-block;
-    padding: 0.2rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    background-color: var(--primary-bg);
-    color: var(--primary-color);
-    margin-left: var(--space-sm);
-    font-weight: 600;
-}
-
-.game-participants, .game-actions {
-    margin-top: var(--space-md);
-}
-
-/* Role-specific card styles */
-.role-admin .game-card {
-    border-left-color: var(--primary-color);
-}
-
-.role-player .game-card {
-    border-left-color: var(--accent-color);
-}
-
-.role-scorekeeper .game-card {
-    border-left-color: var(--warning-color);
-}
-
-/* Friend Card */
-.friend-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left-color: var(--accent-color);
-    padding: var(--space-md) var(--space-lg);
-}
-
-.friend-info span {
-    display: block;
-}
-
-.friend-info .name {
-    font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: var(--space-xs);
-}
-
-.friend-info .email, .friend-info .handicap {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: var(--space-xs);
-}
-
-.friend-info .handicap {
-    display: inline-block;
-    background-color: var(--accent-bg);
-    color: var(--accent-color);
-    padding: 0.1rem 0.5rem;
-    border-radius: var(--radius-sm);
-    margin-top: var(--space-sm);
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.friend-actions {
-    display: flex;
-    gap: var(--space-sm);
-}
-
-/* Icon Buttons */
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    transition: all var(--transition-fast);
-    width: 40px; /* Larger touch target */
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
-}
-
-.icon-btn::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: currentColor;
-    opacity: 0;
-    border-radius: 50%;
-    transform: scale(0);
-    transition: transform var(--transition-fast), opacity var(--transition-fast);
-}
-
-.icon-btn:hover {
-    color: var(--primary-color);
-    background-color: var(--primary-bg);
-}
-
-.icon-btn:hover::after {
-    opacity: 0.1;
-    transform: scale(1);
-}
-
-.icon-btn:active::after {
-    opacity: 0.2;
-}
-
-.icon-btn.delete:hover {
-    color: var(--error-color);
-    background-color: var(--error-light);
-}
-
-.checkbox-group {
-    margin: 0.5rem 0;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-}
-
-.checkbox-label input {
-    width: auto;
-    margin-right: 0.5rem;
-    cursor: pointer;
-    min-width: 20px;
-    min-height: 20px;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-.modal-content {
-    position: relative;
-    background-color: white;
-    max-width: 800px;
-    margin: 5% auto;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.modal-content.large-modal {
-    max-width: 1000px;
-    width: 90%;
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    width: 40px; /* Larger touch target */
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.close-modal:hover {
-    color: var(--primary-color);
-    background-color: var(--light-gray);
-}
-
-.game-details-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-/* Status Badges */
-.game-status {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    box-shadow: var(--shadow-sm);
-}
-
-.status-upcoming {
-    background-color: var(--accent-bg);
-    color: var(--accent-dark);
-    border: 1px solid rgba(25, 118, 210, 0.1);
-}
-
-.status-completed {
-    background-color: var(--success-light);
-    color: var(--success-color);
-    border: 1px solid rgba(76, 175, 80, 0.1);
-}
-
-.status-canceled {
-    background-color: var(--error-light);
-    color: var(--error-color);
-    border: 1px solid rgba(244, 67, 54, 0.1);
-}
-
-.participant-card {
-    padding: 0.7rem 1rem;
-    margin-bottom: 0.5rem;
-    border-left: 3px solid var(--primary-color);
-}
-
-.participant-card .skins-won {
-    margin-left: 1rem;
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-/* Group Grid styles */
-.grid-container {
-    display: grid;
-    grid-template-columns: 1fr 0.5fr 1fr;
-    gap: 1.5rem;
-    margin: 1.5rem 0;
-}
-
-.grid-item {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
     padding: 1rem;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.signup-card, .group-card {
-    border-left-width: 4px;
-    margin-bottom: 0.75rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.signup-card.wolf-player {
-    border-left-color: var(--wolf-color);
-}
-
-/* Badge styles */
-.wolf-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15rem 0.6rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: var(--wolf-light);
-    color: var(--wolf-color);
-    margin-left: 0.5rem;
-    border: 1px solid rgba(25, 118, 210, 0.1);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-fast);
-}
-
-.wolf-badge:hover {
-    transform: translateY(-1px);
-}
-
-.wolf-badge.small {
-    font-size: 0.75rem;
-    padding: 0.1rem 0.4rem;
-}
-
-.wolf-badge::before {
-    content: '🐺';
-    font-size: 0.9rem;
-    margin-right: 0.3rem;
-}
-
-.group-container {
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.group-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* Scorekeeper styles */
-.scorekeeper-selection {
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    background-color: var(--light-gray);
-    border-radius: 4px;
-}
-
-.scorekeeper-selection p {
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-.scorekeeper-selection .hint {
-    display: inline-block;
-    font-size: 0.8rem;
-    color: #666;
-}
-
-.scorekeeper-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 0.4rem 0;
-    margin: 0.2rem 0;
-}
-
-.scorekeeper-radio {
-    margin-right: 0.5rem;
-    min-width: 18px;
-    min-height: 18px;
-}
-
-.member-name {
-    margin-right: 0.5rem;
-}
-
-.scorekeeper-badge {
-    display: inline-block;
-    padding: 0.1rem 0.3rem;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    background-color: #4caf50;
+    background-color: var(--primary-dark);
     color: white;
-    margin-left: 0.5rem;
-}
-
-.hidden {
-    display: none;
-}
-
-.group-member.scorekeeper {
-    background-color: rgba(76, 175, 80, 0.1);
-    border-left: 3px solid #4caf50;
-}
-
-/* Scorekeeper access link styles */
-.scorekeeper-access {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border-left: 3px solid #4caf50;
-}
-
-.access-link-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.scorecard-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: white;
-    padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    overflow: hidden;
-}
-
-.scorecard-link .link {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.copy-link-btn {
-    background-color: var(--light-green);
-    color: var(--primary-color);
-    border: none;
-    padding: 0.5rem 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.copy-link-btn:hover {
-    background-color: #d0e8d0;
-}
-
-/* Score table styles */
-.score-table-container {
-    overflow-x: auto;
-    max-width: 100%;
-    margin-bottom: 1.5rem;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 10px; /* Space for finger scrolling */
-    scrollbar-width: thin;
-    scrollbar-color: var(--secondary-color) var(--light-gray);
-}
-
-.score-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1rem 0;
-}
-
-.score-table th, .score-table td {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-}
-
-.score-table th {
-    background-color: var(--light-green);
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.score-table .player-header {
-    position: sticky;
-    left: 0;
-    z-index: 20;
-    background-color: var(--light-green);
-}
-
-.score-table .player-name {
-    text-align: left;
-    font-weight: bold;
-    background-color: var(--light-gray);
-    position: sticky;
-    left: 0;
-    z-index: 5;
-}
-
-.score-input {
-    width: 50px;
-    padding: 0.4rem;
-    text-align: center;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    -moz-appearance: textfield; /* Remove spinner arrows in Firefox */
-}
-
-/* Remove spinner arrows in Chrome, Safari, Edge, Opera */
-.score-input::-webkit-outer-spin-button,
-.score-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.score-input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-    box-shadow: 0 0 3px var(--primary-color);
-}
-
-.score-input.ctp-hole {
-    background-color: #e3f2fd;
-    border-color: #1976d2;
-}
-
-.total-score {
-    font-weight: bold;
-    background-color: var(--light-gray);
-}
-
-/* Skins results styles */
-.skins-summary {
-    background-color: var(--light-green);
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.skins-summary p {
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.skins-list, .payout-list {
-    list-style-type: none;
-    margin: 0.5rem 0 1.5rem;
-}
-
-.skins-list li, .payout-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.skins-list li:last-child, .payout-list li:last-child {
-    border-bottom: none;
-}
-
-.no-skin {
-    color: #999;
-}
-
-.ctp-skin {
-    color: #1976d2;
-    font-weight: bold;
-}
-
-/* Rules styles */
-.rules-container {
-    background-color: var(--light-gray);
-    padding: 1.5rem;
-    border-radius: 8px;
-}
-
-.rules-container ol {
-    margin-left: 1.5rem;
-}
-
-.rules-container li {
-    margin-bottom: 1rem;
-}
-
-.rules-container ul {
-    margin-left: 1.5rem;
-    margin-top: 0.5rem;
-}
-
-.rules-container ul li {
-    margin-bottom: 0.5rem;
-}
-
-/* Alert messages */
-.alert {
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.alert-success {
-    background-color: var(--success-light);
-    color: var(--success-color);
-    border-left: 4px solid var(--success-color);
-}
-
-.alert-warning {
-    background-color: var(--warning-light);
-    color: var(--warning-color);
-    border-left: 4px solid var(--warning-color);
-}
-
-.alert-error {
-    background-color: var(--error-light);
-    color: var(--error-color);
-    border-left: 4px solid var(--error-color);
-}
-
-/* Role-specific UI components */
-.admin-only, .player-only, .scorekeeper-only {
-    display: none;
-}
-
-.role-admin .admin-only,
-.role-player .player-only,
-.role-scorekeeper .scorekeeper-only {
-    display: block;
-}
-
-/* Enhanced responsiveness */
-@media (max-width: 768px) {
-    main {
-        padding: 1rem;
-        width: 100%;
-    }
-    
-    header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    
-    .tabs {
-        position: sticky;
-        top: 72px; /* Header height */
-        background: white;
-        z-index: 90;
-        padding: 0.5rem 0;
-        margin-left: -1rem;
-        margin-right: -1rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        width: calc(100% + 2rem);
-    }
-    
-    .tab-btn {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.9rem;
-    }
-    
-    .form-group.inline {
-        flex-direction: column;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .btn {
-        width: 100%;
-        margin-right: 0;
-    }
-    
-    .game-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-        padding: 1rem;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    
-    .grid-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .friend-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .friend-info {
-        margin-bottom: 0.5rem;
-        width: 100%;
-    }
-    
-    .friend-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-    
-    .game-details-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .game-status {
-        margin-top: 0.5rem;
-    }
-    
-    /* Enhanced mobile score table */
-    .score-table {
-        font-size: 0.9rem;
-    }
-    
-    .score-input {
-        width: 45px;
-        height: 45px; /* Larger touch target */
-        padding: 0.2rem;
-        font-size: 1rem;
-    }
-    
-    /* Adjust table for small screens - make player column wider */
-    .score-table .player-name {
-        min-width: 120px;
-        max-width: 160px;
-    }
-    
-    /* Improve the score entry UX on mobile */
-    .score-input:focus {
-        font-size: 1.1rem;
-        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
-    }
-    
-    /* Enhanced mobile number picker styles */
-    .mobile-number-picker {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: white;
-        border-top: 1px solid var(--border-color);
-        z-index: 1000;
-        padding: 1.25rem;
-        box-shadow: var(--shadow-lg);
-        animation: slideUp 0.3s ease-out;
-    }
-    
-    @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
-    
-    .picker-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .picker-header h3 {
-        margin: 0;
-        font-size: 1.2rem;
-        color: var(--primary-color);
-    }
-    
-    .close-picker {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-    }
-    
-    .close-picker:hover {
-        background-color: var(--light-gray);
-        color: var(--error-color);
-    }
-    
-    .picker-value {
-        background-color: var(--light-gray);
-        padding: 0.75rem;
-        border-radius: var(--radius);
-        margin-bottom: 1rem;
-        text-align: center;
-        font-size: 1.1rem;
-    }
-    
-    .picker-buttons {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .picker-button {
-        padding: 1rem 0.5rem;
-        font-size: 1.25rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius);
-        background: white;
-        transition: all var(--transition-fast);
-        font-weight: 500;
-    }
-    
-    .picker-button:active, .picker-button.active {
-        background: var(--primary-bg);
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        transform: scale(0.98);
-    }
-    
-    .picker-button.clear {
-        grid-column: span 2;
-        background-color: var(--light-gray);
-        color: var(--text-secondary);
-    }
-    
-    .picker-button.done {
-        grid-column: span 3;
-        background-color: var(--primary-color);
-        color: white;
-        font-weight: 600;
-    }
-    
-    .picker-button.done:active {
-        background-color: var(--primary-dark);
-    }
-    
-    /* Role-specific picker styles */
-    .role-admin .picker-button.done {
-        background-color: var(--primary-color);
-    }
-    
-    .role-player .picker-button.done {
-        background-color: var(--accent-color);
-    }
-    
-    .role-scorekeeper .picker-button.done {
-        background-color: var(--warning-color);
-    }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-    main {
-        padding: 0.75rem;
-    }
-    
-    h2 {
-        font-size: 1.3rem;
-    }
-    
-    .tab-btn {
-        padding: 0.5rem 0.7rem;
-        font-size: 0.85rem;
-    }
-    
-    .game-card, .friend-card {
-        padding: 0.75rem;
-    }
-    
-    .score-input {
-        width: 40px;
-        height: 40px;
-        font-size: 0.95rem;
-    }
-    
-    .score-table .player-name {
-        min-width: 100px;
-    }
-    
-    .rules-container {
-        padding: 1rem;
-    }
-}
-
-/* Print styles for scorecards */
-@media print {
-    header, footer, .tabs, .btn, .icon-btn {
-        display: none !important;
-    }
-    
-    main {
-        max-width: 100%;
-        padding: 0;
-        margin: 0;
-        box-shadow: none;
-    }
-    
-    .score-table-container {
-        overflow: visible;
-    }
-    
-    .score-table {
-        width: 100%;
-        page-break-inside: avoid;
-    }
-    
-    .score-input {
-        border: 1px solid #ddd;
-    }
-    
-    @page {
-        margin: 0.5cm;
-    }
 }
