@@ -8,19 +8,14 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
   const [error, setError] = useState('');
   const [results, setResults] = useState([]);
 
-  // Sample course data with hole handicaps
-  // In a real implementation, this would come from a database
-  const courseDatabase = {
-    'monarch-dunes': {
-      name: 'Monarch Dunes',
-      par: [4, 3, 4, 4, 5, 4, 4, 3, 5], // Sample front 9 pars
-      handicaps: [7, 3, 1, 9, 5, 11, 13, 17, 15] // Handicap rating (1 = hardest, 18 = easiest)
-    },
-    'avila-beach': {
-      name: 'Avila Beach Golf Resort',
-      par: [4, 4, 5, 3, 4, 4, 3, 4, 5],
-      handicaps: [5, 3, 11, 15, 1, 9, 17, 7, 13]
-    }
+  // Monarch Dunes course data with actual hole handicaps
+  const monarchDunesData = {
+    name: 'Monarch Dunes',
+    // Standard par values for each hole - update if needed
+    par: [4, 4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5],
+    // Handicap difficulty ratings from 1 (hardest) to 18 (easiest)
+    // As provided by the course
+    handicaps: [1, 15, 9, 3, 7, 11, 13, 5, 17, 2, 14, 16, 4, 1, 8, 12, 10, 6]
   };
 
   // Generate mock player scores
@@ -109,33 +104,12 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     return skinsResults;
   };
 
-  // Load or generate data
+  // Load course data
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        
-        // In a real implementation, we would fetch the game data
-        // For this demo, we're using mock data
-        if (gameId) {
-          // Get the game
-          const game = { course: 'monarch-dunes', holes: 9 }; // Mock game data
-          setCourseData(courseDatabase[game.course]);
-        } else {
-          // Use default course for demo
-          setCourseData(courseDatabase['monarch-dunes']);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading data:', err);
-        setError('Failed to load course data');
-        setLoading(false);
-      }
-    };
-    
-    loadData();
-  }, [gameId]);
+    // We're always using Monarch Dunes data since that's the only course played
+    setCourseData(monarchDunesData);
+    setLoading(false);
+  }, []);
 
   // Generate scores & calculate results when players or course changes
   useEffect(() => {
@@ -190,15 +164,35 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
       )}
       
       <div className="skins-explanation card">
-        <h4>How Handicaps Work in Skins</h4>
-        <p>In our skins game, handicaps are applied on a hole-by-hole basis:</p>
+        <h4>How Handicaps Work in Skins at Monarch Dunes</h4>
+        <p>In our skins game at Monarch Dunes, handicaps are applied on a hole-by-hole basis:</p>
         <ol>
-          <li>Each hole on the course has a handicap rating from 1 (hardest) to 18 (easiest)</li>
+          <li>Each hole has a handicap rating from 1 (hardest) to 18 (easiest)</li>
           <li>Players receive handicap strokes on holes based on their handicap index</li>
           <li>For example, a player with a 9 handicap would receive one stroke on each of the 9 hardest holes</li>
           <li>After applying handicap strokes, the lowest net score on each hole wins the skin</li>
           <li>If multiple players tie for lowest net score, the skin carries over to the next hole</li>
         </ol>
+        <h4>Monarch Dunes Hole Handicaps</h4>
+        <div className="handicap-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Hole</th>
+                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+                <th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Difficulty</th>
+                <td>1</td><td>15</td><td>9</td><td>3</td><td>7</td><td>11</td><td>13</td><td>5</td><td>17</td>
+                <td>2</td><td>14</td><td>16</td><td>4</td><td>1</td><td>8</td><td>12</td><td>10</td><td>6</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="handicap-note">Note: Lower numbers indicate harder holes where players are more likely to receive handicap strokes</p>
       </div>
       
       {players.length > 0 && (

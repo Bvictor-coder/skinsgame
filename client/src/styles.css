@@ -666,6 +666,40 @@ h3 {
     font-weight: bold;
 }
 
+/* Skins Calculator */
+.skins-calculator {
+    margin-top: 2rem;
+}
+
+.handicap-table {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.handicap-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.handicap-table th,
+.handicap-table td {
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+}
+
+.handicap-table th:first-child {
+    text-align: left;
+}
+
+.handicap-note {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
 .game-notes {
     background-color: rgba(0, 0, 0, 0.03);
     padding: 0.75rem;
