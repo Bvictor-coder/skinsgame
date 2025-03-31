@@ -97,11 +97,25 @@ const ScoreCardPage = () => {
         const allPlayers = await dataSync.getFriends();
         
         // Verify playerIds exist in the group
+        // First try to use playerIds from the group object
         if (!group.playerIds || !Array.isArray(group.playerIds) || group.playerIds.length === 0) {
-          console.error('No player IDs found in this group');
-          setError('No players found in this group. The group may not be properly configured.');
-          setLoading(false);
-          return;
+          console.log('No playerIds array found in group, trying to get players from group.players');
+          
+          // If no playerIds, try to use the players array if it exists
+          if (group.players && Array.isArray(group.players) && group.players.length > 0) {
+            console.log('Found players array in group, extracting playerIds');
+            // Extract playerIds from the players array
+            group.playerIds = group.players.map(player => 
+              typeof player === 'object' ? player.playerId : player
+            ).filter(id => id); // filter out any undefined/null values
+            
+            console.log('Extracted playerIds:', group.playerIds);
+          } else {
+            console.error('No player IDs found in this group and no players array available');
+            setError('No players found in this group. The group may not be properly configured.');
+            setLoading(false);
+            return;
+          }
         }
         
         const groupPlayers = allPlayers.filter(player => 
