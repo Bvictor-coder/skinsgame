@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
 import { calculateGameSkins } from '../utils/skinsCalculator';
+import CtpSelectionModal from './CtpSelectionModal';
 import '../styles/ScorecardStyles.css';
 
 // Assuming we have this data from monarch-dunes.js; we'll hardcode for now
@@ -43,6 +44,7 @@ const ScoreCardPage = () => {
   
   // State for CTP (Closest to Pin)
   const [ctpPlayer, setCtpPlayer] = useState(null);
+  const [showCtpModal, setShowCtpModal] = useState(false);
   
   // State for results calculation
   const [calculatedResults, setCalculatedResults] = useState(null);
@@ -308,6 +310,52 @@ const ScoreCardPage = () => {
     });
   };
   
+  // Finalize the game
+  const finalizeGame = async () => {
+    try {
+      setSaving(true);
+      
+      // Get latest game data
+      const gamesData = await dataSync.getGames();
+      const currentGame = gamesData.find(g => g.id === gameId);
+      
+      if (!currentGame) {
+        setError('Game not found');
+        setSaving(false);
+        return;
+      }
+      
+      // Update the game status
+      const updatedGame = {
+        ...currentGame,
+        status: 'completed',
+        completedDate: new Date().toISOString(),
+        ctpPlayerId: ctpPlayer, // Ensure CTP is included
+        scores: {
+          ...currentGame.scores,
+          calculated: calculatedResults
+        }
+      };
+      
+      // Save the updated game
+      await dataSync.updateGame(updatedGame);
+      
+      // Update local state
+      setGame(updatedGame);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      
+      // Display a success message
+      alert('Game has been finalized successfully! Results are now available in Game History.');
+      
+    } catch (err) {
+      console.error('Error finalizing game:', err);
+      setError('Failed to finalize game. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+  
   // Save scores to localStorage
   const saveScores = async () => {
     try {
@@ -437,10 +485,21 @@ const ScoreCardPage = () => {
   // Render the scorecard
   return (
     <div className="scorecard-container">
-      {/* Header */}
+      {/* Header with Home Navigation */}
       <div className="scorecard-header">
-        <h2>Scorecard</h2>
-        <p>{game.courseName || 'Monarch Dunes'}</p>
+        <div className="header-navigation">
+          <button 
+            className="home-nav-btn" 
+            onClick={() => navigate('/')}
+            title="Return to Home"
+          >
+            <i className="fas fa-home"></i> Home
+          </button>
+        </div>
+        <div>
+          <h2>Scorecard</h2>
+          <p>{game.courseName || 'Monarch Dunes'}</p>
+        </div>
       </div>
       
       {/* Game info */}
@@ -712,47 +771,14 @@ const ScoreCardPage = () => {
           {completedHolesCount() === 18 && (!game.status || game.status !== 'completed') && (
             <button 
               className="btn-success finalize-btn"
-              onClick={async () => {
-                try {
-                  setSaving(true);
-                  
-                  // Get latest game data
-                  const gamesData = await dataSync.getGames();
-                  const currentGame = gamesData.find(g => g.id === gameId);
-                  
-                  if (!currentGame) {
-                    setError('Game not found');
-                    setSaving(false);
-                    return;
-                  }
-                  
-                  // Update the game status
-                  const updatedGame = {
-                    ...currentGame,
-                    status: 'completed',
-                    completedDate: new Date().toISOString(),
-                    scores: {
-                      ...currentGame.scores,
-                      calculated: calculatedResults
-                    }
-                  };
-                  
-                  // Save the updated game
-                  await dataSync.updateGame(updatedGame);
-                  
-                  // Update local state
-                  setGame(updatedGame);
-                  setSaved(true);
-                  setTimeout(() => setSaved(false), 2000);
-                  
-                  // Display a success message
-                  alert('Game has been finalized successfully! Results are now available in Game History.');
-                  
-                } catch (err) {
-                  console.error('Error finalizing game:', err);
-                  setError('Failed to finalize game. Please try again.');
-                } finally {
-                  setSaving(false);
+              onClick={() => {
+                // First ensure CTP is set before finalizing
+                if (!ctpPlayer) {
+                  // Open CTP selection modal if not already set
+                  setShowCtpModal(true);
+                } else {
+                  // Proceed with finalization if CTP is already set
+                  finalizeGame();
                 }
               }}
             >
@@ -768,6 +794,19 @@ const ScoreCardPage = () => {
           )}
         </div>
       </div>
+      
+      {/* CTP Modal */}
+      <CtpSelectionModal 
+        isOpen={showCtpModal}
+        onClose={() => setShowCtpModal(false)}
+        gameId={gameId}
+        onSelectCtp={(playerId) => {
+          setCtpPlayer(playerId);
+          setShowCtpModal(false);
+          // Proceed with finalization after CTP is set
+          finalizeGame();
+        }}
+      />
     </div>
   );
 };
