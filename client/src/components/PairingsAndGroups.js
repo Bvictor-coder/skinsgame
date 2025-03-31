@@ -99,9 +99,11 @@ const PairingsAndGroups = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log("PairingsAndGroups: Loading data...");
         
         // Get all games
         const gamesData = await dataSync.getGames();
+        console.log("PairingsAndGroups: Games loaded:", gamesData);
         
         // Filter to only upcoming games (games with date >= today)
         const today = new Date();

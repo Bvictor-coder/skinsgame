@@ -7,6 +7,7 @@ import WeeklySignUpManagement from './components/WeeklySignUpManagement';
 import GameHistory from './components/GameHistory';
 import UpcomingGames from './components/UpcomingGames';
 import PairingsAndGroups from './components/PairingsAndGroups';
+import PlayerSignUp from './components/PlayerSignUp';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
@@ -224,8 +225,7 @@ const AppContent = () => {
             <>
               {activeTab === 'sign-up' && (
                 <div id="sign-up">
-                  <h2>Sign Up for Games</h2>
-                  <p className="empty-state">This tab will allow signing up for games.</p>
+                  <PlayerSignUp />
                 </div>
               )}
               
