@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
+import SkinsCalculator from './SkinsCalculator';
 
 const GameHistory = () => {
   const [games, setGames] = useState([]);
@@ -287,6 +288,17 @@ const GameHistory = () => {
                     ))}
                   </div>
                 </div>
+                
+                {getActiveSignups().length > 0 && (
+                  <div className="skins-calculator-container">
+                    <SkinsCalculator 
+                      gameId={selectedGame.id} 
+                      players={getActiveSignups().map(signup => 
+                        players.find(p => p.id === signup.playerId)
+                      ).filter(Boolean)} 
+                    />
+                  </div>
+                )}
               </>
             ) : (
               <div className="empty-state">
