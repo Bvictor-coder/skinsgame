@@ -498,6 +498,188 @@ h3 {
     margin-bottom: 1.5rem;
 }
 
+/* Weekly Signup Management styles */
+.signup-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.games-sidebar {
+    border-right: 1px solid var(--light-gray);
+    padding-right: 1rem;
+}
+
+.game-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.game-item {
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.game-item:hover {
+    background-color: var(--light-gray);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.game-item.active {
+    border-color: var(--primary-color);
+    background-color: rgba(0, 124, 62, 0.05);
+}
+
+.game-date {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.game-course {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.game-time {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.game-info {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.selected-game-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-game-info {
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.signup-actions {
+    margin-bottom: 1.5rem;
+}
+
+.signup-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.signup-table th,
+.signup-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.signup-table th {
+    background-color: var(--light-gray);
+    font-weight: 600;
+}
+
+/* Game History styles */
+.date-range {
+    color: #666;
+    font-style: italic;
+    margin-top: -1rem;
+    margin-bottom: 1.5rem;
+}
+
+.history-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.game-details-panel {
+    flex: 1;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.results-table th {
+    background-color: var(--light-gray);
+    font-weight: 600;
+}
+
+.results-table tr:first-child {
+    font-weight: bold;
+}
+
+.ctp-winner {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--light-gray);
+}
+
+.player-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.player-chip {
+    background-color: var(--light-gray);
+    padding: 0.5rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.wolf-badge {
+    background-color: var(--secondary-color);
+    color: var(--primary-dark);
+    border-radius: 2rem;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    font-weight: bold;
+}
+
+.game-notes {
+    background-color: rgba(0, 0, 0, 0.03);
+    padding: 0.75rem;
+    border-left: 3px solid var(--secondary-color);
+    margin-top: 0.75rem;
+    font-style: italic;
+}
+
+h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
 .players-header h2 {
     margin-bottom: 0;
 }

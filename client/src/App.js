@@ -3,6 +3,8 @@ import { UserProvider, useUser, ROLES } from './utils/userContext';
 import Header from './components/Header';
 import PlayersManagement from './components/PlayersManagement';
 import NewGameForm from './components/NewGameForm';
+import WeeklySignUpManagement from './components/WeeklySignUpManagement';
+import GameHistory from './components/GameHistory';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
@@ -185,8 +187,7 @@ const AppContent = () => {
               
               {activeTab === 'admin-sign-up' && (
                 <div id="admin-sign-up">
-                  <h2>Weekly Sign-up</h2>
-                  <p className="empty-state">This tab will display sign-up management.</p>
+                  <WeeklySignUpManagement />
                 </div>
               )}
               
@@ -205,8 +206,7 @@ const AppContent = () => {
               
               {activeTab === 'history' && (
                 <div id="history">
-                  <h2>Game History</h2>
-                  <p className="empty-state">This tab will display game history.</p>
+                  <GameHistory />
                 </div>
               )}
             </>
