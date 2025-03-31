@@ -8,7 +8,16 @@ const WeeklySignUpManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedGame, setSelectedGame] = useState(null);
-  const [newSignup, setNewSignup] = useState({ playerId: '', wolf: false });
+  const [newSignup, setNewSignup] = useState({ 
+    playerId: '', 
+    wolf: false, 
+    lateAddition: false, 
+    lateReason: '',
+    notes: '',
+    startingPosition: 'A'
+  });
+  const [showQuickAddPlayer, setShowQuickAddPlayer] = useState(false);
+  const [quickAddPlayer, setQuickAddPlayer] = useState({ name: '', email: '', handicap: '' });
   const [success, setSuccess] = useState('');
 
   // Load games, players, and signups on component mount
@@ -102,6 +111,56 @@ const WeeklySignUpManagement = () => {
     });
   };
 
+  // Handle adding a new player (quick add)
+  const handleQuickAddPlayer = async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!quickAddPlayer.name || !quickAddPlayer.email) {
+      setError('Name and email are required');
+      return;
+    }
+    
+    // Email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(quickAddPlayer.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Add the player to the database
+      const newPlayer = await dataSync.addFriend({
+        name: quickAddPlayer.name,
+        email: quickAddPlayer.email,
+        handicap: quickAddPlayer.handicap ? parseFloat(quickAddPlayer.handicap) : null
+      });
+      
+      // Update our players list
+      setPlayers([...players, newPlayer]);
+      
+      // Select this player for signup
+      setNewSignup({
+        ...newSignup,
+        playerId: newPlayer.id
+      });
+      
+      // Clear quick add form and hide it
+      setQuickAddPlayer({ name: '', email: '', handicap: '' });
+      setShowQuickAddPlayer(false);
+      
+      setSuccess('New player added successfully');
+      setLoading(false);
+    } catch (err) {
+      console.error('Error adding new player:', err);
+      setError('Failed to add new player');
+      setLoading(false);
+    }
+  };
+
   // Handle adding a new signup
   const handleAddSignup = async (e) => {
     e.preventDefault();
@@ -131,11 +190,14 @@ const WeeklySignUpManagement = () => {
       setLoading(true);
       setError('');
       
-      // Add signup to dataSync
+      // Add signup to dataSync with the additional fields
       await dataSync.addSignup(selectedGame.id, {
         playerId: newSignup.playerId,
         wolf: newSignup.wolf,
-        notes: ''
+        lateAddition: newSignup.lateAddition,
+        lateReason: newSignup.lateReason,
+        notes: newSignup.notes,
+        startingPosition: newSignup.startingPosition
       });
       
       // Update local state
@@ -144,7 +206,10 @@ const WeeklySignUpManagement = () => {
         {
           playerId: newSignup.playerId,
           wolf: newSignup.wolf,
-          notes: ''
+          lateAddition: newSignup.lateAddition,
+          lateReason: newSignup.lateReason,
+          notes: newSignup.notes,
+          startingPosition: newSignup.startingPosition
         }
       ];
       
@@ -154,7 +219,14 @@ const WeeklySignUpManagement = () => {
       });
       
       // Reset form
-      setNewSignup({ playerId: '', wolf: false });
+      setNewSignup({
+        playerId: '',
+        wolf: false,
+        lateAddition: false,
+        lateReason: '',
+        notes: '',
+        startingPosition: 'A'
+      });
       setSuccess('Player added to sign-up list');
       
       setLoading(false);
@@ -402,16 +474,22 @@ const WeeklySignUpManagement = () => {
               <th>Player</th>
               <th>Handicap</th>
               <th>Wolf Game</th>
+              <th>Status</th>
+              <th>Start</th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
             ${activeSignups.map(signup => {
               const player = players.find(p => p.id === signup.playerId) || {};
               return `
-                <tr>
+                <tr ${signup.lateAddition ? 'style="background-color: #fffde7;"' : ''}>
                   <td>${player.name || 'Unknown Player'}</td>
                   <td>${player.handicap || 'N/A'}</td>
                   <td>${signup.wolf ? 'Yes' : 'No'}</td>
+                  <td>${signup.lateAddition ? '<span style="color:#f57f17;font-weight:bold;">LATE</span>' : 'Regular'}</td>
+                  <td>${signup.startingPosition || 'A'}</td>
+                  <td>${signup.lateAddition && signup.lateReason ? signup.lateReason : (signup.notes || '-')}</td>
                 </tr>
               `;
             }).join('')}
@@ -508,39 +586,178 @@ const WeeklySignUpManagement = () => {
                   </div>
                 </div>
                 
+                {/* Quick Add Player Form */}
+                {showQuickAddPlayer && (
+                  <div className="quick-add-player card">
+                    <div className="card-header">
+                      <h4>Quick Add New Player</h4>
+                      <button 
+                        type="button" 
+                        className="btn btn-small btn-secondary" 
+                        onClick={() => setShowQuickAddPlayer(false)}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <form onSubmit={handleQuickAddPlayer}>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="quickAddName">Name</label>
+                          <input
+                            type="text"
+                            id="quickAddName"
+                            name="name"
+                            value={quickAddPlayer.name}
+                            onChange={(e) => setQuickAddPlayer({...quickAddPlayer, name: e.target.value})}
+                            required
+                            placeholder="Player's full name"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="quickAddEmail">Email</label>
+                          <input
+                            type="email"
+                            id="quickAddEmail"
+                            name="email"
+                            value={quickAddPlayer.email}
+                            onChange={(e) => setQuickAddPlayer({...quickAddPlayer, email: e.target.value})}
+                            required
+                            placeholder="player@example.com"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="quickAddHandicap">Handicap (optional)</label>
+                          <input
+                            type="number"
+                            id="quickAddHandicap"
+                            name="handicap"
+                            value={quickAddPlayer.handicap}
+                            onChange={(e) => setQuickAddPlayer({...quickAddPlayer, handicap: e.target.value})}
+                            step="0.1"
+                            min="0"
+                            placeholder="Enter handicap"
+                          />
+                        </div>
+                      </div>
+                      <div className="form-actions">
+                        <button 
+                          type="submit" 
+                          className="btn"
+                          disabled={loading}
+                        >
+                          {loading ? 'Adding...' : 'Add Player'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+                
+                {/* Player Signup Form */}
                 <div className="signup-actions card">
                   <h4>Add Player to Sign-up List</h4>
                   <form onSubmit={handleAddSignup}>
                     <div className="form-row">
-                      <div className="form-group">
+                      <div className="form-group player-selection">
                         <label htmlFor="playerId">Player</label>
+                        <div className="selection-wrapper">
+                          <select
+                            id="playerId"
+                            name="playerId"
+                            value={newSignup.playerId}
+                            onChange={handleInputChange}
+                            required
+                          >
+                            <option value="">Select a player</option>
+                            {getAvailablePlayers().map(player => (
+                              <option key={player.id} value={player.id}>
+                                {player.name} {player.handicap ? `(${player.handicap})` : ''}
+                              </option>
+                            ))}
+                          </select>
+                          
+                          {!showQuickAddPlayer && (
+                            <button 
+                              type="button" 
+                              className="btn btn-small" 
+                              onClick={() => setShowQuickAddPlayer(true)}
+                            >
+                              <i className="fas fa-plus"></i> Quick Add
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="form-row checkboxes">
+                        <div className="form-group checkbox-group">
+                          <input
+                            type="checkbox"
+                            id="wolf"
+                            name="wolf"
+                            checked={newSignup.wolf}
+                            onChange={handleInputChange}
+                          />
+                          <label htmlFor="wolf">Playing Wolf Game</label>
+                        </div>
+                        
+                        <div className="form-group checkbox-group">
+                          <input
+                            type="checkbox"
+                            id="lateAddition"
+                            name="lateAddition"
+                            checked={newSignup.lateAddition}
+                            onChange={handleInputChange}
+                          />
+                          <label htmlFor="lateAddition">Late Addition</label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Conditional fields that appear when late addition is checked */}
+                    {newSignup.lateAddition && (
+                      <div className="form-row late-info">
+                        <div className="form-group">
+                          <label htmlFor="lateReason">Reason for Late Addition</label>
+                          <input
+                            type="text"
+                            id="lateReason"
+                            name="lateReason"
+                            value={newSignup.lateReason}
+                            onChange={handleInputChange}
+                            placeholder="Explain reason for late addition"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="startingPosition">Starting Position</label>
                         <select
-                          id="playerId"
-                          name="playerId"
-                          value={newSignup.playerId}
+                          id="startingPosition"
+                          name="startingPosition"
+                          value={newSignup.startingPosition}
                           onChange={handleInputChange}
-                          required
                         >
-                          <option value="">Select a player</option>
-                          {getAvailablePlayers().map(player => (
-                            <option key={player.id} value={player.id}>
-                              {player.name} {player.handicap ? `(${player.handicap})` : ''}
-                            </option>
-                          ))}
+                          <option value="A">A (First Tee)</option>
+                          <option value="B">B (Tenth Tee)</option>
                         </select>
                       </div>
                       
-                      <div className="form-group checkbox-group">
+                      <div className="form-group">
+                        <label htmlFor="notes">Special Notes</label>
                         <input
-                          type="checkbox"
-                          id="wolf"
-                          name="wolf"
-                          checked={newSignup.wolf}
+                          type="text"
+                          id="notes"
+                          name="notes"
+                          value={newSignup.notes}
                           onChange={handleInputChange}
+                          placeholder="Any special requests or notes"
                         />
-                        <label htmlFor="wolf">Playing Wolf Game</label>
                       </div>
                     </div>
+                    
                     <div className="form-actions">
                       <button 
                         type="submit" 
@@ -563,7 +780,10 @@ const WeeklySignUpManagement = () => {
                         <tr>
                           <th>Player</th>
                           <th>Handicap</th>
-                          <th>Wolf Game</th>
+                          <th>Wolf</th>
+                          <th>Status</th>
+                          <th>Start</th>
+                          <th>Notes</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -571,10 +791,31 @@ const WeeklySignUpManagement = () => {
                         {getActiveSignups().map(signup => {
                           const player = players.find(p => p.id === signup.playerId);
                           return (
-                            <tr key={signup.playerId}>
+                            <tr 
+                              key={signup.playerId} 
+                              className={signup.lateAddition ? 'late-addition' : ''}
+                            >
                               <td>{getPlayerName(signup.playerId)}</td>
                               <td>{player ? player.handicap : '-'}</td>
                               <td>{signup.wolf ? 'Yes' : 'No'}</td>
+                              <td>
+                                {signup.lateAddition ? 
+                                  <span className="tag tag-warning">LATE</span> : 
+                                  <span className="tag tag-success">Regular</span>
+                                }
+                              </td>
+                              <td>{signup.startingPosition || 'A'}</td>
+                              <td>
+                                {signup.lateAddition && signup.lateReason ? 
+                                  <span title={signup.lateReason}>
+                                    {signup.lateReason.length > 15 ? 
+                                      `${signup.lateReason.substring(0, 15)}...` : 
+                                      signup.lateReason
+                                    }
+                                  </span> : 
+                                  signup.notes || '-'
+                                }
+                              </td>
                               <td className="actions">
                                 <button 
                                   onClick={() => handleRemoveSignup(signup.playerId)} 

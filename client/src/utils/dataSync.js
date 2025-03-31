@@ -534,13 +534,19 @@ class DataSyncService {
           gameId,
           playerId: signup.playerId,
           wolf: signup.wolf || false,
-          notes: signup.notes || ''
+          notes: signup.notes || '',
+          lateAddition: signup.lateAddition || false,
+          lateReason: signup.lateReason || '',
+          startingPosition: signup.startingPosition || 'A'
         });
         
         const newSignup = {
           playerId: response.data.playerId,
           wolf: response.data.wolf,
-          notes: response.data.notes
+          notes: response.data.notes,
+          lateAddition: response.data.lateAddition,
+          lateReason: response.data.lateReason,
+          startingPosition: response.data.startingPosition
         };
         
         if (!this.localData.signups[gameId]) {
