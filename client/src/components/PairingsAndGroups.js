@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dataSync from '../utils/dataSync';
 
 const PairingsAndGroups = () => {
