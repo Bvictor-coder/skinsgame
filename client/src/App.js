@@ -197,6 +197,7 @@ const AppContent = () => {
               
               {activeTab === 'grouping' && (
                 <div id="grouping">
+                  {console.log("Rendering PairingsAndGroups in admin section")}
                   <PairingsAndGroups />
                 </div>
               )}

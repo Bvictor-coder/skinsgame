@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import dataSync from '../utils/dataSync';
 
 const PairingsAndGroups = () => {
+  console.log("PairingsAndGroups: Component rendering started");
   const [games, setGames] = useState([]);
   const [players, setPlayers] = useState([]);
   const [signups, setSignups] = useState({});
@@ -105,6 +106,11 @@ const PairingsAndGroups = () => {
         const gamesData = await dataSync.getGames();
         console.log("PairingsAndGroups: Games loaded:", gamesData);
         
+        // Get all players early to avoid dependency issues
+        const playersData = await dataSync.getFriends();
+        console.log("PairingsAndGroups: Players loaded:", playersData.length);
+        setPlayers(playersData);
+        
         // Filter to only upcoming games (games with date >= today)
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Start of today
@@ -135,11 +141,6 @@ const PairingsAndGroups = () => {
             setGroups(autoGroups);
           }
         }
-        
-        // Get all players
-        const playersData = await dataSync.getFriends();
-        setPlayers(playersData);
-        
         setLoading(false);
       } catch (err) {
         console.error('Error loading data:', err);
