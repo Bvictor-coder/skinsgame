@@ -34,7 +34,7 @@ const AppContent = () => {
     if (isAuthenticated()) {
       switch (user.role) {
         case ROLES.ADMIN:
-          setActiveTab('upcoming'); // Admin starts at upcoming games
+          setActiveTab('friends'); // Admin starts at Players management tab
           break;
         case ROLES.PLAYER:
           setActiveTab('signup'); // Players start at sign-up view
