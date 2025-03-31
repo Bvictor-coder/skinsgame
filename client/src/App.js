@@ -68,7 +68,7 @@ const AppContent = () => {
         case ROLES.ADMIN:
           // Admin-specific tabs
           tabs.push({ id: 'new-game', label: 'Create New Game' });
-          tabs.push({ id: 'sign-up', label: 'Weekly Sign-up' });
+          tabs.push({ id: 'admin-sign-up', label: 'Weekly Sign-up' });
           tabs.push({ id: 'grouping', label: 'Pairings & Groups' });
           tabs.push({ id: 'friends', label: 'Players' });
           tabs.push({ id: 'history', label: 'Game History' });
@@ -100,7 +100,7 @@ const AppContent = () => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <p>Loading Golf Skins Organizer...</p>
+        <p>Loading The Skins Game...</p>
       </div>
     );
   }
@@ -182,8 +182,8 @@ const AppContent = () => {
                 </div>
               )}
               
-              {activeTab === 'sign-up' && (
-                <div id="sign-up">
+              {activeTab === 'admin-sign-up' && (
+                <div id="admin-sign-up">
                   <h2>Weekly Sign-up</h2>
                   <p className="empty-state">This tab will display sign-up management.</p>
                 </div>
@@ -260,7 +260,7 @@ const AppContent = () => {
       </main>
       
       <footer>
-        <p>Golf Skins Game Organizer &copy; 2025</p>
+        <p>The Skins Game &copy; 2025</p>
       </footer>
     </div>
   );
