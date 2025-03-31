@@ -5,6 +5,8 @@ import PlayersManagement from './components/PlayersManagement';
 import NewGameForm from './components/NewGameForm';
 import WeeklySignUpManagement from './components/WeeklySignUpManagement';
 import GameHistory from './components/GameHistory';
+import UpcomingGames from './components/UpcomingGames';
+import PairingsAndGroups from './components/PairingsAndGroups';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 
@@ -164,8 +166,7 @@ const AppContent = () => {
         <div className="tab-content active">
           {activeTab === 'upcoming' && (
             <div id="upcoming">
-              <h2>Upcoming Games</h2>
-              <p className="empty-state">This tab will display upcoming games.</p>
+              <UpcomingGames />
             </div>
           )}
           
@@ -193,8 +194,7 @@ const AppContent = () => {
               
               {activeTab === 'grouping' && (
                 <div id="grouping">
-                  <h2>Pairings & Groups</h2>
-                  <p className="empty-state">This tab will display grouping interface.</p>
+                  <PairingsAndGroups />
                 </div>
               )}
               
