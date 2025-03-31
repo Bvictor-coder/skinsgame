@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 // Import dataSync commented out as it's not currently used in this component
 // import dataSync from '../utils/dataSync';
 
@@ -6,18 +6,19 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
   const [courseData, setCourseData] = useState(null);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Define error state but we don't need the setter currently - keeping for future use
+  const [, setError] = useState('');
   const [results, setResults] = useState([]);
 
-  // Monarch Dunes course data with actual hole handicaps
-  const monarchDunesData = {
+  // Wrap the constant data in useMemo to prevent it from causing re-renders
+  const monarchDunesData = useMemo(() => ({
     name: 'Monarch Dunes',
     // Actual par values for Monarch Dunes
     par: [4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 4, 3, 5, 3, 5, 4, 3, 4], // Course par: 72 (Front 9: 36, Back 9: 36)
     // Handicap difficulty ratings from 1 (hardest) to 18 (easiest)
     // As provided by the course
     handicaps: [1, 15, 9, 3, 7, 11, 13, 5, 17, 2, 14, 16, 4, 1, 8, 12, 10, 6]
-  };
+  }), []);
 
   // Generate mock player scores - wrap in useCallback to fix dependency issues
   // Generate mock player scores
@@ -159,11 +160,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     <div className="skins-calculator">
       <h3>Skins Calculation System</h3>
       
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
+      {/* Error display section removed as we're not using the error state currently */}
       
       <div className="skins-explanation card">
         <h4>How Handicaps Work in Skins at Monarch Dunes</h4>
