@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { UserProvider, useUser, ROLES } from './utils/userContext';
 import Header from './components/Header';
 import PlayersManagement from './components/PlayersManagement';
@@ -8,10 +9,12 @@ import GameHistory from './components/GameHistory';
 import UpcomingGames from './components/UpcomingGames';
 import PairingsAndGroups from './components/PairingsAndGroups';
 import PlayerSignUp from './components/PlayerSignUp';
+import ScoreCardPage from './components/ScoreCardPage';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 import './styles/ManualAdjustmentStyles.css'; // Import manual adjustment interface styles
 import './styles/ShotgunStartStyles.css'; // Import shotgun start styles
+import './styles/ScorecardStyles.css'; // Import scorecard styles
 
 // Import the simplified component for debugging
 import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
@@ -282,11 +285,31 @@ const AppContent = () => {
   );
 };
 
-// Root component that wraps the app with providers
+// Define routes-based app
+const AppRoutes = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <Routes>
+      {/* Main tab-based interface */}
+      <Route path="/" element={<AppContent />} />
+      
+      {/* Scorecard page with gameId and groupId parameters */}
+      <Route path="/scorecard/:gameId/:groupId" element={<ScoreCardPage />} />
+      
+      {/* Redirect all other paths to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
+// Root component that wraps the app with providers and router
 const App = () => {
   return (
     <UserProvider>
-      <AppContent />
+      <Router>
+        <AppRoutes />
+      </Router>
     </UserProvider>
   );
 };

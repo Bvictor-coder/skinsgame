@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dataSync from '../utils/dataSync';
+import ScoreCardAccessor from './ScoreCardAccessor';
 
 const PairingsAndGroups = () => {
   console.log("PairingsAndGroups: Component rendering started");
@@ -763,6 +764,46 @@ const PairingsAndGroups = () => {
                                 </div>
                               )}
                             </div>
+                            
+                            {/* Scorekeeper assignment and scorecard access */}
+                            <div className="scorekeeper-container">
+                              <div className="scorekeeper-label">Scorekeeper:</div>
+                              <div className="scorekeeper-controls">
+                                <select
+                                  className="scorekeeper-selector"
+                                  value={group.scorekeeperId || ''}
+                                  onChange={(e) => {
+                                    const updatedGroups = [...groups];
+                                    updatedGroups[originalIndex] = {
+                                      ...updatedGroups[originalIndex],
+                                      scorekeeperId: e.target.value || null
+                                    };
+                                    setGroups(updatedGroups);
+                                  }}
+                                >
+                                  <option value="">-- Select Scorekeeper --</option>
+                                  {Array.isArray(group.players) && group.players.map(player => {
+                                    const playerDetail = players.find(p => p.id === player.playerId);
+                                    return playerDetail ? (
+                                      <option key={playerDetail.id} value={playerDetail.id}>
+                                        {playerDetail.name}
+                                      </option>
+                                    ) : null;
+                                  })}
+                                </select>
+                              </div>
+                            </div>
+                            
+                            {/* Scorecard access for this group */}
+                            {selectedGame && group.scorekeeperId && (
+                              <div className="scorecard-access">
+                                <ScoreCardAccessor 
+                                  gameId={selectedGame.id} 
+                                  groupIndex={originalIndex} 
+                                  group={group} 
+                                />
+                              </div>
+                            )}
                           </div>
                         );
                       })}
