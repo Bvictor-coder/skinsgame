@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUser, ROLES } from '../utils/userContext';
+import { useUser } from '../utils/userContext';
 import api from '../utils/api';
 
 const LoginModal = ({ isOpen, onClose }) => {
