@@ -54,36 +54,68 @@ const ScoreCardPage = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log(`Loading scorecard for gameId: ${gameId}, groupId: ${groupId}`);
         
         // Get game data from localStorage
         const gamesData = await dataSync.getGames();
+        console.log(`Found ${gamesData.length} games in storage`);
+        
+        // Validate gameId
+        if (!gameId) {
+          setError('Invalid game ID. Please check the URL and try again.');
+          setLoading(false);
+          return;
+        }
+        
         const game = gamesData.find(g => g.id === gameId);
         
         if (!game) {
-          setError('Game not found');
+          console.error(`Game with ID ${gameId} not found`);
+          setError(`Game not found. Please ensure the game exists and you have the correct access link.`);
           setLoading(false);
           return;
         }
         
+        console.log(`Found game: ${game.courseName}, date: ${game.date}`);
         setGame(game);
         
-        // Get the specific group
-        const group = game.groups && game.groups[parseInt(groupId)];
+        // Get the specific group - try both string and number format for groupId
+        let groupIndex = parseInt(groupId);
+        let group = game.groups && (game.groups[groupIndex] || game.groups.find(g => g.id === groupId));
         
         if (!group) {
-          setError('Group not found');
+          console.error(`Group with index/id ${groupId} not found in game`);
+          setError(`Group not found within this game. Please check your access link or contact the administrator.`);
           setLoading(false);
           return;
         }
         
+        console.log(`Found group with ${group.playerIds?.length || 0} players`);
         setGroup(group);
         
         // Get players in this group
         const allPlayers = await dataSync.getFriends();
+        
+        // Verify playerIds exist in the group
+        if (!group.playerIds || !Array.isArray(group.playerIds) || group.playerIds.length === 0) {
+          console.error('No player IDs found in this group');
+          setError('No players found in this group. The group may not be properly configured.');
+          setLoading(false);
+          return;
+        }
+        
         const groupPlayers = allPlayers.filter(player => 
           group.playerIds.includes(player.id)
         );
         
+        if (groupPlayers.length === 0) {
+          console.error('No matching players found for this group');
+          setError('No player data found for this group. Please contact the administrator.');
+          setLoading(false);
+          return;
+        }
+        
+        console.log(`Found ${groupPlayers.length} players for this group`);
         setPlayers(groupPlayers);
         
         // Initialize handicaps

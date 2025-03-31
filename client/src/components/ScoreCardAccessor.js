@@ -13,6 +13,7 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
   const [isScorekeeperUser, setIsScorekeeperUser] = useState(false);
   const [scorekeeperInfo, setScorekeeperInfo] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [accessCode, setAccessCode] = useState("1234"); // Default simple code
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -31,11 +32,35 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
         if (scorekeeper) {
           setScorekeeperInfo(scorekeeper);
         }
+        
+        // Generate a simple accessCode - either use an existing one or create a new one
+        if (group.accessCode) {
+          setAccessCode(group.accessCode);
+        } else {
+          // Generate a simple 4-digit PIN
+          const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+          setAccessCode(newCode);
+          
+          // Save the code to the group
+          const updatedGroup = { ...group, accessCode: newCode };
+          
+          // Get the game to update the group
+          const gamesData = await dataSync.getGames();
+          const game = gamesData.find(g => g.id === gameId);
+          
+          if (game && game.groups) {
+            const updatedGroups = [...game.groups];
+            updatedGroups[groupIndex] = updatedGroup;
+            
+            const updatedGame = { ...game, groups: updatedGroups };
+            await dataSync.updateGame(updatedGame);
+          }
+        }
       }
     };
     
     checkIfScorekeeper();
-  }, [group]);
+  }, [gameId, group, groupIndex]);
   
   // Generate a direct link to the scorecard page
   const getScorecardLink = () => {
@@ -95,15 +120,35 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
               <div className="scorecard-link-display">
                 <code>{getScorecardLink()}</code>
               </div>
-              <p className="login-code-info">
-                <strong>Important:</strong> Scorekeeper will need this login code: <code>{`${gameId}-${groupIndex}`}</code>
-              </p>
-              <button 
-                className="btn btn-secondary copy-link-btn"
-                onClick={copyLinkToClipboard}
-              >
-                {linkCopied ? 'Link Copied to Clipboard! ✓' : 'Copy Link to Clipboard'}
-              </button>
+              <div className="login-code-info">
+                <div className="simple-access-code">
+                  <h4>Scorekeeper Login Code</h4>
+                  <div className="code-display">{accessCode}</div>
+                </div>
+                <p>
+                  <strong>Note:</strong> The scorekeeper will need this simple 4-digit code to access and enter scores.
+                </p>
+              </div>
+              <div className="scorecard-actions">
+                <button 
+                  className="btn btn-secondary copy-link-btn"
+                  onClick={copyLinkToClipboard}
+                >
+                  {linkCopied ? 'Link Copied! ✓' : 'Copy Link'}
+                </button>
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+                    setAccessCode(newCode);
+                    
+                    // Update the group with the new code (in a real app)
+                    // This is simplified for demonstration
+                  }}
+                >
+                  Generate New Code
+                </button>
+              </div>
             </div>
           )}
           

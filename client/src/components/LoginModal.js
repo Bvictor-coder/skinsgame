@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '../utils/userContext';
+import dataSync from '../utils/dataSync';
 
 /**
  * Login Modal Component
@@ -9,15 +10,64 @@ import { useUser } from '../utils/userContext';
 const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
   const [role, setRole] = useState('');
   const [playerId, setPlayerId] = useState('');
-  const [password, setPassword] = useState('');
+  const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const { loginAsAdmin, loginAsPlayer, loginAsScorekeeper } = useUser();
+  
+  // Load players for the dropdown when the modal opens
+  useEffect(() => {
+    const loadPlayers = async () => {
+      if (isOpen && role === 'player') {
+        setLoading(true);
+        try {
+          const allPlayers = await dataSync.getFriends();
+          setPlayers(allPlayers || []);
+        } catch (err) {
+          console.error('Error loading players:', err);
+          setError('Unable to load players. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadPlayers();
+  }, [isOpen, role]);
+  
+  // Load game data for scorekeeper code validation
+  useEffect(() => {
+    const loadGameData = async () => {
+      if (isOpen && role === 'scorekeeper' && gameId && groupIndex !== undefined) {
+        try {
+          // Try to get the simple access code from the group
+          const gamesData = await dataSync.getGames();
+          const game = gamesData.find(g => g.id === gameId);
+          
+          if (game && game.groups && game.groups[groupIndex]) {
+            const group = game.groups[groupIndex];
+            
+            // Check if the group has an accessCode property
+            if (group.accessCode) {
+              // Show a hint about the access code format
+              console.log('Access code is available:', group.accessCode);
+            }
+          }
+        } catch (err) {
+          console.error('Error loading game data for access code:', err);
+        }
+      }
+    };
+    
+    loadGameData();
+  }, [isOpen, role, gameId, groupIndex]);
   
   // Don't render if not open
   if (!isOpen) return null;
   
   // Handle login attempt
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
     
     if (role === 'admin') {
@@ -33,20 +83,37 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
         setError('Please select a player');
       }
     } else if (role === 'scorekeeper') {
-      // For scorekeeper, validate password
-      // For now, scorekeeper password is either gameId-groupIndex or 'scorekeeper123'
-      const validPassword = gameId && groupIndex !== undefined 
-        ? `${gameId}-${groupIndex}` 
-        : 'scorekeeper123';
+      // For scorekeeper, validate the simple access code
+      try {
+        // Get the group data to verify the access code
+        const gamesData = await dataSync.getGames();
+        const game = gamesData.find(g => g.id === gameId);
         
-      // Display the password directly for this demo
-      console.log("Valid scorekeeper password:", validPassword);
-      
-      if (password === validPassword) {
-        loginAsScorekeeper(gameId, groupIndex, password);
-        onClose();
-      } else {
-        setError('Invalid scorekeeper password');
+        if (!game) {
+          setError('Game not found. Please check the link and try again.');
+          return;
+        }
+        
+        const group = game.groups && game.groups[groupIndex];
+        
+        if (!group) {
+          setError('Group not found. Please check the link and try again.');
+          return;
+        }
+        
+        // Allow the default 4-digit code or the specific accessCode from the group
+        const validCode = group.accessCode || '1234';
+        
+        // Also allow a master code for testing
+        if (accessCode === validCode || accessCode === '0000') {
+          loginAsScorekeeper(gameId, groupIndex, accessCode);
+          onClose();
+        } else {
+          setError('Invalid scorekeeper code. Please check and try again.');
+        }
+      } catch (err) {
+        console.error('Error validating scorekeeper access:', err);
+        setError('Error validating scorekeeper access. Please try again.');
       }
     } else {
       setError('Please select a role');
@@ -115,32 +182,47 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
           {role === 'player' && (
             <div className="form-group">
               <label>Select Player:</label>
-              <select 
-                value={playerId} 
-                onChange={(e) => setPlayerId(e.target.value)}
-              >
-                <option value="">-- Select Player --</option>
-                {/* Player options would be populated here */}
-              </select>
+              {loading ? (
+                <div className="loading-indicator">Loading players...</div>
+              ) : (
+                <select 
+                  value={playerId} 
+                  onChange={(e) => setPlayerId(e.target.value)}
+                >
+                  <option value="">-- Select Player --</option>
+                  {players.map(player => (
+                    <option key={player.id} value={player.id}>
+                      {player.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {players.length === 0 && !loading && (
+                <div className="info-message">
+                  No players found. Please contact the administrator.
+                </div>
+              )}
             </div>
           )}
           
-          {/* Only show password field for scorekeeper, not for admin */}
+          {/* Only show access code field for scorekeeper, not for admin */}
           {role === 'scorekeeper' && (
             <div className="form-group">
-              <label>Password:</label>
+              <label>Scorekeeper Access Code:</label>
               <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter scorekeeper code"
+                type="text"
+                className="access-code-input"
+                value={accessCode} 
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="Enter 4-digit code"
+                maxLength={4}
+                pattern="[0-9]*"
               />
               
-              {gameId && groupIndex !== undefined && (
-                <div className="password-hint">
-                  <p>Scorekeeper code format: <strong>{gameId}-{groupIndex}</strong></p>
-                </div>
-              )}
+              <div className="access-code-help">
+                <p>Enter the 4-digit access code provided by the administrator.</p>
+                <p className="fallback-hint">Tip: Try code <strong>0000</strong> if you don't have the access code.</p>
+              </div>
             </div>
           )}
           
