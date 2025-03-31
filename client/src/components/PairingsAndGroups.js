@@ -13,6 +13,7 @@ const PairingsAndGroups = () => {
   const [success, setSuccess] = useState('');
   const [renderError, setRenderError] = useState(null);
   const [localStorageError, setLocalStorageError] = useState(null);
+  const [sortBy, setSortBy] = useState('default'); // 'default' or 'startingHole'
   
   // Check localStorage availability
   useEffect(() => {
@@ -107,7 +108,9 @@ const PairingsAndGroups = () => {
           newGroups.push({
             id: `group-${Date.now()}-${newGroups.length}`,
             name: `Group ${newGroups.length + 1}`,
-            players: newGroupPlayers
+            players: newGroupPlayers,
+            startingHole: null,
+            startingPosition: null
           });
         }
       }
@@ -115,6 +118,58 @@ const PairingsAndGroups = () => {
     
     return newGroups;
   }, [players]);
+
+  // Update a group's starting hole information
+  const updateGroupStartingHole = (groupIndex, holeNumber, position) => {
+    const updatedGroups = [...groups];
+    
+    // Validate hole number (1-18)
+    const validatedHoleNumber = parseInt(holeNumber);
+    if (isNaN(validatedHoleNumber) || validatedHoleNumber < 1 || validatedHoleNumber > 18) {
+      // If invalid, clear the starting hole
+      updatedGroups[groupIndex] = {
+        ...updatedGroups[groupIndex],
+        startingHole: null,
+        startingPosition: null
+      };
+    } else {
+      // If valid, update the starting hole and position
+      updatedGroups[groupIndex] = {
+        ...updatedGroups[groupIndex],
+        startingHole: validatedHoleNumber,
+        startingPosition: position
+      };
+    }
+    
+    setGroups(updatedGroups);
+  };
+
+  // Sort groups by criteria
+  const getSortedGroups = () => {
+    if (sortBy === 'startingHole') {
+      return [...groups].sort((a, b) => {
+        // Groups without starting holes go last
+        if (!a.startingHole && !b.startingHole) return 0;
+        if (!a.startingHole) return 1;
+        if (!b.startingHole) return -1;
+        
+        // Sort by hole number first
+        if (a.startingHole !== b.startingHole) {
+          return a.startingHole - b.startingHole;
+        }
+        
+        // Then by position (a before b)
+        if (a.startingPosition === 'a' && b.startingPosition === 'b') return -1;
+        if (a.startingPosition === 'b' && b.startingPosition === 'a') return 1;
+        
+        // Default to original order
+        return 0;
+      });
+    }
+    
+    // Default sorting (by group index)
+    return groups;
+  };
 
   // Load games, players, and signups on component mount
   useEffect(() => {
@@ -350,6 +405,17 @@ const PairingsAndGroups = () => {
       };
     });
     
+    // Sort groups for print if needed
+    let printGroups = groupsWithDetails;
+    if (sortBy === 'startingHole') {
+      printGroups = [...groupsWithDetails].sort((a, b) => {
+        if (!a.startingHole && !b.startingHole) return 0;
+        if (!a.startingHole) return 1;
+        if (!b.startingHole) return -1;
+        return a.startingHole - b.startingHole;
+      });
+    }
+    
     // Create HTML for printing
     const printContent = `
       <!DOCTYPE html>
@@ -391,6 +457,21 @@ const PairingsAndGroups = () => {
             text-align: center;
             color: #666;
           }
+          .starting-hole {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: #e8f4f8;
+            border: 1px solid #c8e6f0;
+            color: #2980b9;
+            font-weight: bold;
+            margin-left: 10px;
+          }
+          .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
           @media print {
             body {
               padding: 0;
@@ -412,9 +493,14 @@ const PairingsAndGroups = () => {
         </div>
         
         <div class="groups">
-          ${groupsWithDetails.map((group, index) => `
+          ${printGroups.map((group, index) => `
             <div class="group">
-              <h3>Group ${index + 1}</h3>
+              <div class="group-header">
+                <h3>Group ${index + 1}</h3>
+                ${group.startingHole ? 
+                  `<div class="starting-hole">Starting Hole: ${group.startingHole}${group.startingPosition ? group.startingPosition : ''}</div>` : 
+                  ''}
+              </div>
               <table>
                 <thead>
                   <tr>
@@ -484,6 +570,9 @@ const PairingsAndGroups = () => {
       
       // Safe check for games array
       const safeGames = Array.isArray(games) ? games : [];
+      
+      // Get sorted groups based on current sort criteria
+      const sortedGroups = getSortedGroups();
       
       // Normal component rendering
       return loading && !safeGames.length ? (
@@ -557,47 +646,126 @@ const PairingsAndGroups = () => {
                 <div className="player-groups">
                   <h4>Player Groups ({getActiveSignups().length} players total)</h4>
                   
+                  {/* Sort controls */}
+                  {groups.length > 0 && (
+                    <div className="sort-controls">
+                      <span className="sort-label">Sort by:</span>
+                      <label>
+                        <input 
+                          type="radio" 
+                          name="sort" 
+                          value="default" 
+                          checked={sortBy === 'default'} 
+                          onChange={() => setSortBy('default')} 
+                        /> 
+                        Group Order
+                      </label>
+                      <label>
+                        <input 
+                          type="radio" 
+                          name="sort" 
+                          value="startingHole" 
+                          checked={sortBy === 'startingHole'} 
+                          onChange={() => setSortBy('startingHole')} 
+                        /> 
+                        Starting Hole
+                      </label>
+                    </div>
+                  )}
+                  
                   {getActiveSignups().length === 0 ? (
                     <p className="empty-state">No players have signed up for this game yet</p>
                   ) : !Array.isArray(groups) || groups.length === 0 ? (
                     <p className="empty-state">Click "Generate Groups" to create player groups</p>
                   ) : (
-                    <div className="groups-list">
-                      {groups.map((group, groupIndex) => (
-                        <div key={group.id || groupIndex} className="group-card card">
-                          <h4>Group {groupIndex + 1}</h4>
-                          <table className="group-table">
-                            <thead>
-                              <tr>
-                                <th>Player</th>
-                                <th>Handicap</th>
-                                <th>Wolf Game</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {Array.isArray(group.players) ? group.players.map(player => {
-                                // Safety check to ensure player is a valid object
-                                if (!player || typeof player !== 'object') return null;
-                                
-                                const playerDetail = Array.isArray(players) ? 
-                                  players.find(p => p && p.id === player.playerId) : null;
+                    <div className={`groups-list ${sortBy === 'startingHole' ? 'sorted-by-hole' : ''}`}>
+                      {sortedGroups.map((group, groupIndex) => {
+                        // Get the original index for reference
+                        const originalIndex = groups.findIndex(g => g.id === group.id);
+                        
+                        return (
+                          <div 
+                            key={group.id || groupIndex} 
+                            className={`group-card card ${group.startingHole ? 'hole-assigned' : ''}`}
+                          >
+                            <h4>Group {originalIndex + 1}</h4>
+                            <table className="group-table">
+                              <thead>
+                                <tr>
+                                  <th>Player</th>
+                                  <th>Handicap</th>
+                                  <th>Wolf Game</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Array.isArray(group.players) ? group.players.map(player => {
+                                  // Safety check to ensure player is a valid object
+                                  if (!player || typeof player !== 'object') return null;
                                   
-                                const playerId = player.playerId || 'unknown-player';
+                                  const playerDetail = Array.isArray(players) ? 
+                                    players.find(p => p && p.id === player.playerId) : null;
+                                    
+                                  const playerId = player.playerId || 'unknown-player';
+                                  
+                                  return (
+                                    <tr key={playerId}>
+                                      <td>{playerDetail ? playerDetail.name : 'Unknown Player'}</td>
+                                      <td>{playerDetail ? playerDetail.handicap : '-'}</td>
+                                      <td>{player.wolf ? 'Yes' : 'No'}</td>
+                                    </tr>
+                                  );
+                                }) : (
+                                  <tr><td colSpan="3">No players in this group</td></tr>
+                                )}
+                              </tbody>
+                            </table>
+                            
+                            {/* Starting hole assignment UI */}
+                            <div className="starting-hole-container">
+                              <div className="starting-hole-label">Starting Hole:</div>
+                              <div className="starting-hole-controls">
+                                <input
+                                  type="number"
+                                  className="hole-number-input"
+                                  min="1"
+                                  max="18"
+                                  value={group.startingHole || ''}
+                                  onChange={(e) => updateGroupStartingHole(
+                                    originalIndex, 
+                                    e.target.value, 
+                                    group.startingPosition || 'a'
+                                  )}
+                                  placeholder="#"
+                                />
                                 
-                                return (
-                                  <tr key={playerId}>
-                                    <td>{playerDetail ? playerDetail.name : 'Unknown Player'}</td>
-                                    <td>{playerDetail ? playerDetail.handicap : '-'}</td>
-                                    <td>{player.wolf ? 'Yes' : 'No'}</td>
-                                  </tr>
-                                );
-                              }) : (
-                                <tr><td colSpan="3">No players in this group</td></tr>
+                                <select
+                                  className="position-selector"
+                                  value={group.startingPosition || 'a'}
+                                  onChange={(e) => updateGroupStartingHole(
+                                    originalIndex, 
+                                    group.startingHole || '', 
+                                    e.target.value
+                                  )}
+                                  disabled={!group.startingHole}
+                                >
+                                  <option value="a">A</option>
+                                  <option value="b">B</option>
+                                </select>
+                              </div>
+                              
+                              {group.startingHole ? (
+                                <div className="starting-hole-badge">
+                                  Hole {group.startingHole}{group.startingPosition || ''}
+                                </div>
+                              ) : (
+                                <div className="starting-hole-badge">
+                                  Not assigned
+                                </div>
                               )}
-                            </tbody>
-                          </table>
-                        </div>
-                      ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -609,7 +777,7 @@ const PairingsAndGroups = () => {
             )}
           </div>
         </div>
-      )
+      );
     } catch (error) {
       console.error("Render error:", error);
       setRenderError(error.message);

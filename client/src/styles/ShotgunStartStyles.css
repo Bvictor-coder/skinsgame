@@ -1,0 +1,103 @@
+/* Shotgun Start Assignment Styles */
+
+/* Starting Hole Input Container */
+.starting-hole-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  background-color: #f5f9ff;
+  border-top: 1px solid #e1e9f8;
+  margin-top: 10px;
+}
+
+/* Starting Hole Label */
+.starting-hole-label {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-right: 10px;
+}
+
+/* Starting Hole Controls */
+.starting-hole-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Numeric Input for Hole Number */
+.hole-number-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Position Selector (a/b) */
+.position-selector {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Starting Hole Display Badge */
+.starting-hole-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #e8f4f8;
+  border: 1px solid #c8e6f0;
+  border-radius: 12px;
+  color: #2980b9;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+/* Highlight when hole is assigned */
+.hole-assigned .starting-hole-container {
+  background-color: #eafaf1;
+  border-color: #d5f5e3;
+}
+
+.hole-assigned .starting-hole-badge {
+  background-color: #d5f5e3;
+  border-color: #a9dfbf;
+  color: #27ae60;
+}
+
+/* Sort Controls */
+.sort-controls {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/* When groups are sorted by hole, add borders to separate different holes */
+.sorted-by-hole .group-card:not(:first-child) {
+  margin-top: 15px;
+  border-top: 2px solid #eee;
+}
+
+/* Heading for hole sections when sorted */
+.hole-section-header {
+  background-color: #f8f9fa;
+  padding: 5px 10px;
+  margin: 15px 0 5px 0;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #495057;
+}
+
+/* Make the hole number more prominent in the print view */
+@media print {
+  .starting-hole-badge {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+}

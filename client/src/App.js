@@ -11,6 +11,7 @@ import PlayerSignUp from './components/PlayerSignUp';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 import './styles/ManualAdjustmentStyles.css'; // Import manual adjustment interface styles
+import './styles/ShotgunStartStyles.css'; // Import shotgun start styles
 
 // Import the simplified component for debugging
 import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
