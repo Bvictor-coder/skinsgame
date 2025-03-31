@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserProvider, useUser, ROLES } from './utils/userContext';
 import Header from './components/Header';
 import dataSync from './utils/dataSync';
+import './styles.css'; // Import our enhanced styles
 
 // Main application component that handles role-based views
 const AppContent = () => {
