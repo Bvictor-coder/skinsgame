@@ -287,8 +287,7 @@ const AppContent = () => {
 
 // Define routes-based app
 const AppRoutes = () => {
-  const navigate = useNavigate();
-  
+  // Remove unused navigate variable
   return (
     <Routes>
       {/* Main tab-based interface */}

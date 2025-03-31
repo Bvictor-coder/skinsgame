@@ -15,10 +15,7 @@ export const calculateHandicapStroke = (courseHandicap, holeIndex) => {
   // No handicap strokes if courseHandicap is 0
   if (courseHandicap <= 0) return 0;
   
-  // Convert holeIndex to 0-based difficulty (0 = hardest)
   // Note: holeIndex is 1-based (1 = hardest)
-  const zeroBasedIndex = holeIndex - 1;
-  
   // Base handicap (up to 18): Get half stroke on N hardest holes
   // where N is the course handicap
   if (courseHandicap <= 18) {
