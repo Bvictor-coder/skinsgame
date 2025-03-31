@@ -21,13 +21,9 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
     setError('');
     
     if (role === 'admin') {
-      // For admin, check hardcoded password
-      if (password === process.env.REACT_APP_ADMIN_PASSWORD) {
-        loginAsAdmin();
-        onClose();
-      } else {
-        setError('Invalid admin password');
-      }
+      // For admin, allow access without password in this demo version
+      loginAsAdmin();
+      onClose();
     } else if (role === 'player') {
       // For player, ensure a player is selected
       if (playerId) {
@@ -129,17 +125,18 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
             </div>
           )}
           
-          {(role === 'admin' || role === 'scorekeeper') && (
+          {/* Only show password field for scorekeeper, not for admin */}
+          {role === 'scorekeeper' && (
             <div className="form-group">
               <label>Password:</label>
               <input 
                 type="password" 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={role === 'scorekeeper' ? "Enter scorekeeper code" : "Enter admin password"}
+                placeholder="Enter scorekeeper code"
               />
               
-              {role === 'scorekeeper' && gameId && groupIndex !== undefined && (
+              {gameId && groupIndex !== undefined && (
                 <div className="password-hint">
                   <p>Scorekeeper code format: <strong>{gameId}-{groupIndex}</strong></p>
                 </div>
