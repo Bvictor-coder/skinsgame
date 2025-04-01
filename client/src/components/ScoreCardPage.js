@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
-import { calculateGameSkins } from '../utils/skinsCalculator';
+import { calculateGameSkins, calculateHalfStrokeHandicap, GAME_FORMATS } from '../utils/skinsCalculator';
+import EnhancedScoreEntry from './EnhancedScoreEntry';
+import '../styles/EnhancedScoreEntry.css';
 import CtpSelectionModal from './CtpSelectionModal';
 import { useUser, ROLES } from '../utils/userContext';
 import '../styles/ScorecardStyles.css';
@@ -614,10 +616,19 @@ const ScoreCardPage = () => {
                           className={`hole-player-score ${isWinner ? 'winner-row' : ''} ${isTied ? 'tied-row' : ''}`}
                         >
                           <div>{score.playerName}</div>
-                          <div>
-                            {score.grossScore} - {score.handicapStroke > 0 ? score.handicapStroke : 0} = 
-                            <span className="net-score"> {score.netScore}</span>
-                          </div>
+                      <div className="score-breakdown">
+                        <span className="gross-score">{score.grossScore}</span>
+                        {score.handicapStroke > 0 && (
+                          <>
+                            {' - '}
+                            <span className={`handicap-value ${score.handicapStroke % 1 !== 0 ? 'half-stroke' : 'full-stroke'}`}>
+                              {score.handicapStroke % 1 !== 0 ? '½' : score.handicapStroke}
+                            </span>
+                          </>
+                        )}
+                        {' = '}
+                        <span className="net-score"> {score.netScore}</span>
+                      </div>
                         </div>
                       );
                     })}
@@ -748,44 +759,47 @@ const ScoreCardPage = () => {
             </div>
           </div>
           
-          {/* Score Entry */}
+          {/* Score Entry with Half-Stroke Handicap Display */}
           <div className="score-entry">
-            {players.map(player => (
-              <div key={player.id} className="player-row">
-                <div className="player-details">
-                  <div className="player-row-name">{player.name}</div>
-                  <div className="player-handicap">
-                    Handicap: {handicaps[player.id] || 0}
+            {players.map(player => {
+              // Check if this is a CTP hole
+              const isCTPHole = currentHole === 2; // Default CTP on hole #2
+              const playerHandicap = handicaps[player.id] || 0;
+              
+              return (
+                <div key={player.id} className="player-row">
+                  <div className="player-details">
+                    <div className="player-row-name">{player.name}</div>
+                    <div className="player-handicap">
+                      Handicap: {playerHandicap}
+                    </div>
+                  </div>
+                  <div className="score-controls">
+                    <EnhancedScoreEntry
+                      playerId={player.id}
+                      holeNumber={currentHole}
+                      isCTPHole={isCTPHole}
+                      playerHandicap={playerHandicap}
+                      value={scores[player.id]?.[currentHole] || ''}
+                      onChange={(score) => updateScore(player.id, score)}
+                      monarchFormat={true} // Use Monarch Dunes half-stroke format
+                    />
                   </div>
                 </div>
-                <div className="score-controls">
-                  <button 
-                    className="score-btn"
-                    onClick={() => {
-                      const currentScore = scores[player.id]?.[currentHole];
-                      if (currentScore && currentScore > 1) {
-                        updateScore(player.id, currentScore - 1);
-                      }
-                    }}
-                    disabled={!scores[player.id]?.[currentHole] || scores[player.id][currentHole] <= 1}
-                  >
-                    -
-                  </button>
-                  <div className="score-display">
-                    {scores[player.id]?.[currentHole] || '-'}
-                  </div>
-                  <button 
-                    className="score-btn"
-                    onClick={() => {
-                      const currentScore = scores[player.id]?.[currentHole] || 0;
-                      updateScore(player.id, currentScore + 1);
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+          
+          <div className="handicap-legend">
+            <div className="legend-title">Handicap Strokes:</div>
+            <div className="legend-item">
+              <div className="handicap-indicator half-stroke">½</div>
+              <span>Half Stroke</span>
+            </div>
+            <div className="legend-item">
+              <div className="handicap-indicator full-stroke">1</div>
+              <span>Full Stroke</span>
+            </div>
           </div>
         </>
       )}

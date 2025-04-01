@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import dataSync from '../utils/dataSync';
+import { deleteGame } from '../store/actions/gameActions';
 import EnhancedStatusBadge from './EnhancedStatusBadge';
 import GameStatusTimeline from './GameStatusTimeline';
 import CtpPlayerSelector from './CtpPlayerSelector';
+import DeleteGameModal from './DeleteGameModal';
 import gameLifecycleManager from '../utils/GameLifecycleManager';
 import '../styles/GameManagementStyles.css';
 
@@ -12,7 +15,9 @@ const GameManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedGameId, setExpandedGameId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Load all games on component mount
   useEffect(() => {
@@ -272,6 +277,31 @@ const GameManagement = () => {
     localStorage.setItem('activeGameId', gameId);
     navigate('/');  // Redirect to home and the user can click on Pairings tab
   };
+  
+  // Function to handle game deletion with confirmation
+  const handleDeleteGame = async (gameId) => {
+    try {
+      // Perform the deletion using the Redux action
+      await dispatch(deleteGame(gameId));
+      
+      // Update local state by filtering out the deleted game
+      setGames(prev => prev.filter(g => g.id !== gameId));
+      
+      // Clear any previous error
+      setError(null);
+      
+      // If the deleted game was expanded, collapse it
+      if (expandedGameId === gameId) {
+        setExpandedGameId(null);
+      }
+    } catch (err) {
+      console.error('Error deleting game:', err);
+      setError(`Failed to delete game: ${err.message}`);
+    }
+  };
+  
+  // Get the game to delete based on showDeleteConfirm state
+  const gameToDelete = games.find(g => g.id === showDeleteConfirm);
 
   // Render loading state
   if (loading) {
@@ -289,6 +319,14 @@ const GameManagement = () => {
       <p className="admin-instructions">Manage the lifecycle of games from creation to finalization.</p>
       
       {error && <div className="error-message">{error}</div>}
+      
+      {/* Delete Game Modal */}
+      <DeleteGameModal 
+        isOpen={!!showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(null)}
+        game={gameToDelete}
+        onConfirmDelete={handleDeleteGame}
+      />
       
       <div className="game-list">
         <div className="game-header">
@@ -328,6 +366,27 @@ const GameManagement = () => {
               
               {expandedGameId === game.id && (
                 <div className="game-details">
+                  {/* Delete confirmation dialog */}
+                  {showDeleteConfirm === game.id && (
+                    <div className="delete-confirmation">
+                      <p>Are you sure you want to delete this game? This action cannot be undone.</p>
+                      <div className="confirmation-buttons">
+                        <button 
+                          className="btn-confirm-delete" 
+                          onClick={() => handleDeleteGame(game.id)}
+                        >
+                          Yes, Delete Game
+                        </button>
+                        <button 
+                          className="btn-cancel-delete" 
+                          onClick={() => setShowDeleteConfirm(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="game-info">
                     <div className="game-detail">
                       <strong>Game ID:</strong> {game.id}
@@ -377,6 +436,17 @@ const GameManagement = () => {
                         onClick={() => goToPairingsAndGroups(game.id)}
                       >
                         Manage Players & Groups
+                      </button>
+                      
+                      {/* Delete Game Button */}
+                      <button
+                        className="action-btn action-delete-game"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent expanding/collapsing
+                          setShowDeleteConfirm(game.id);
+                        }}
+                      >
+                        Delete Game
                       </button>
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import dataSync from '../utils/dataSync';
+import { GAME_FORMATS } from '../utils/skinsCalculator';
 import NewGameNotification from './NewGameNotification';
 
 const NewGameForm = () => {
@@ -12,6 +13,7 @@ const NewGameForm = () => {
     entryFee: '',
     signupDeadline: '',
     wolfEnabled: false,
+    gameFormat: 'monarch_half_stroke', // Default to Monarch Dunes half-stroke format
     notes: ''
   };
 
@@ -250,6 +252,25 @@ const NewGameForm = () => {
             </div>
           </div>
           
+          {/* Game Format Selection */}
+          <div className="form-group">
+            <label htmlFor="gameFormat">Skins Game Format</label>
+            <select
+              id="gameFormat"
+              name="gameFormat"
+              value={formData.gameFormat}
+              onChange={handleInputChange}
+            >
+              <option value={GAME_FORMATS.MONARCH_HALF_STROKE}>Monarch Dunes (Half-Stroke)</option>
+              <option value={GAME_FORMATS.STANDARD}>Standard Skins</option>
+              <option value={GAME_FORMATS.NO_CARRYOVER}>No Carryover</option>
+              <option value={GAME_FORMATS.DOUBLE_ON_PAR_5}>Double on Par 5s</option>
+            </select>
+            <p className="hint">
+              Monarch Dunes (default): Uses half-strokes, no carryover on ties.
+            </p>
+          </div>
+
           {/* Wolf Game Option */}
           <div className="form-group checkbox-group">
             <input

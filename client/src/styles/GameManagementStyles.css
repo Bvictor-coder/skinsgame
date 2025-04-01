@@ -267,6 +267,60 @@
   background-color: #5c636a;
 }
 
+/* Delete game button */
+.action-delete-game {
+  background-color: #dc3545;
+  color: white;
+  margin-left: auto; /* Push to the right */
+}
+
+.action-delete-game:hover:not(:disabled) {
+  background-color: #bb2d3b;
+}
+
+/* Delete confirmation dialog */
+.delete-confirmation {
+  grid-column: 1 / -1;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  border-radius: 4px;
+  color: #842029;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-confirm-delete {
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-confirm-delete:hover {
+  background-color: #bb2d3b;
+}
+
+.btn-cancel-delete {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel-delete:hover {
+  background-color: #5c636a;
+}
+
 .action-set-ctp {
   background-color: #0d6efd;
   color: white;

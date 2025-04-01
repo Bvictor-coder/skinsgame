@@ -1,0 +1,230 @@
+/* Enhanced Game Results Styles */
+
+.game-results {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.results-header h3 {
+  margin: 0;
+}
+
+.pot-info {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.pot-breakdown {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pot-item {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+}
+
+.pot-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.pot-value {
+  font-size: 1.2em;
+  color: #198754;
+}
+
+.player-results,
+.skins-breakdown {
+  margin-bottom: 20px;
+}
+
+.results-table,
+.skins-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.results-table th,
+.skins-table th {
+  background-color: #f8f9fa;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.results-table td,
+.skins-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.results-table tr:last-child td,
+.skins-table tr:last-child td {
+  border-bottom: none;
+}
+
+.winner-highlight {
+  background-color: #d4edda;
+}
+
+.winning-skin {
+  background-color: #e8f4f9;
+}
+
+/* Score display styles */
+.score-display {
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.handicap-indicator {
+  color: #6a1b9a;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+/* Score type styling */
+.score-type {
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.score-type.birdie {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.score-type.eagle {
+  background-color: #9fe5c5;
+  color: #0c3820;
+}
+
+.score-type.albatross {
+  background-color: #41d29d;
+  color: #032011;
+}
+
+.score-type.par {
+  background-color: #e2e3e5;
+  color: #41464b;
+}
+
+.score-type.bogey {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.score-type.double {
+  background-color: #ffe69c;
+  color: #664d03;
+}
+
+/* Skin value display */
+.skin-value {
+  font-weight: 500;
+}
+
+.money-value {
+  margin-left: 5px;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.carryover {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Player Stats Table */
+.player-stats {
+  margin-top: 25px;
+  margin-bottom: 20px;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.95em;
+}
+
+.stats-table th {
+  background-color: #f8f9fa;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.stats-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.over-par {
+  color: #dc3545;
+}
+
+.under-par {
+  color: #28a745;
+}
+
+.ctp-winner {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 15px;
+  border-left: 4px solid #28a745;
+}
+
+.ctp-winner h4 {
+  margin-top: 0;
+  color: #28a745;
+}
+
+.empty-results-state {
+  padding: 30px;
+  text-align: center;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .pot-breakdown {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .pot-item {
+    width: 100%;
+  }
+  
+  .results-table, 
+  .skins-table {
+    font-size: 0.9em;
+  }
+}

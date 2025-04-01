@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
-import StatusBadge from './StatusBadge';
+import EnhancedStatusBadge from './EnhancedStatusBadge';
 import '../styles/ScoreCardAccessor.css';
 
 /**
@@ -134,7 +134,7 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
       {/* Game Status Display */}
       {game && (
         <div className="game-status-section">
-          <h3>Game Status: <StatusBadge status={game.status || 'created'} /></h3>
+          <h3>Game Status: <EnhancedStatusBadge status={game.status || 'created'} size="medium" /></h3>
           
           {game.status === 'finalized' && (
             <div className="status-message finalized-message">

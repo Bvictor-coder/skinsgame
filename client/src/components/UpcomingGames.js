@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
+import EnhancedStatusBadge from './EnhancedStatusBadge';
 
 const UpcomingGames = () => {
   const [games, setGames] = useState([]);
@@ -86,6 +87,12 @@ const UpcomingGames = () => {
                   <div className="game-header">
                     <h3>{getCourseName(game.course)}</h3>
                     <span className="game-date">{formatDate(game.date)}</span>
+                    <div className="game-status">
+                      <EnhancedStatusBadge 
+                        status={game.status || 'created'} 
+                        size="small" 
+                      />
+                    </div>
                   </div>
                   
                   <div className="game-details">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
-import SkinsCalculator from './SkinsCalculator';
-import StatusBadge from './StatusBadge';
+import GameResults from './GameResults';
+import EnhancedStatusBadge from './EnhancedStatusBadge';
 import '../styles/GameHistoryStyles.css';
 
 const GameHistory = () => {
@@ -217,6 +217,9 @@ const GameHistory = () => {
                     <div className="game-time">{game.time}</div>
                     <div className="game-info">
                       {game.holes} holes • ${game.entryFee || 0}
+                      <div className="game-item-status">
+                        <EnhancedStatusBadge status={game.status || 'created'} size="small" />
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -254,7 +257,7 @@ const GameHistory = () => {
                     </div>
                   ) : (
                     <div className="status-badge">
-                      <StatusBadge status={selectedGame.status || 'created'} />
+                      <EnhancedStatusBadge status={selectedGame.status || 'created'} size="medium" />
                     </div>
                   )}
                   
@@ -306,12 +309,11 @@ const GameHistory = () => {
                 </div>
                 
                 {getActiveSignups().length > 0 && (
-                  <div className="skins-calculator-container">
-                    <SkinsCalculator 
-                      gameId={selectedGame.id} 
-                      players={getActiveSignups().map(signup => 
-                        players.find(p => p.id === signup.playerId)
-                      ).filter(Boolean)} 
+                  <div className="game-results-container">
+                    <GameResults 
+                      game={selectedGame} 
+                      players={players}
+                      signups={getActiveSignups()}
                     />
                   </div>
                 )}

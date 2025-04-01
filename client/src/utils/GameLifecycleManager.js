@@ -185,11 +185,11 @@ class GameLifecycleManager {
    * @returns {boolean} True if the game can be finalized
    */
   canFinalizeGame(game) {
-    // Can only finalize completed games with calculated scores
+    // Can only finalize completed games
+    // Check for CTP player as a requirement
     return (
       game.status === GAME_STATUSES.COMPLETED &&
-      game.scores &&
-      game.scores.calculated
+      game.ctpPlayerId
     );
   }
   
@@ -270,15 +270,21 @@ class GameLifecycleManager {
       throw new Error('Cannot finalize a game that is not in Completed status');
     }
     
-    if (!game.scores || !game.scores.calculated) {
-      throw new Error('Cannot finalize a game without calculated scores');
+    if (!game.ctpPlayerId) {
+      throw new Error('Cannot finalize a game without a Closest to Pin player selected');
+    }
+    
+    // Ensure we have scores
+    if (!game.scores) {
+      game.scores = { raw: [], calculated: {} };
     }
     
     // Add special metadata for finalization
     return this.transitionGame(game, GAME_STATUSES.FINALIZED, {
       metadata: {
         resultsConfirmed: true,
-        finalizedTimestamp: new Date().toISOString()
+        finalizedTimestamp: new Date().toISOString(),
+        ctpPlayerId: game.ctpPlayerId
       }
     });
   }

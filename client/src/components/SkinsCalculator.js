@@ -1,155 +1,81 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-// Import dataSync commented out as it's not currently used in this component
-// import dataSync from '../utils/dataSync';
+import React, { useState, useEffect } from 'react';
+import skinsCalculatorUtil, { 
+  MONARCH_DUNES_DATA, 
+  GAME_FORMATS, 
+  DEFAULT_FORMAT
+} from '../utils/skinsCalculator';
 
 const SkinsCalculator = ({ gameId, players = [] }) => {
-  const [courseData, setCourseData] = useState(null);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Removed error state since it's not being used
   const [results, setResults] = useState([]);
+  const [playerSummary, setPlayerSummary] = useState([]);
+  const [format, setFormat] = useState(DEFAULT_FORMAT);
+  const [gameOptions, setGameOptions] = useState({
+    ctpHole: 2, // Default CTP on hole #2
+    entryFee: 20,
+    ctpPercentage: 0.25 // 25% of pot to CTP
+  });
 
-  // Wrap the constant data in useMemo to prevent it from causing re-renders
-  const monarchDunesData = useMemo(() => ({
-    name: 'Monarch Dunes',
-    // Actual par values for Monarch Dunes
-    par: [4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 4, 3, 5, 3, 5, 4, 3, 4], // Course par: 72 (Front 9: 36, Back 9: 36)
-    // Handicap difficulty ratings from 1 (hardest) to 18 (easiest)
-    // As provided by the course
-    handicaps: [1, 15, 9, 3, 7, 11, 13, 5, 17, 2, 14, 16, 4, 1, 8, 12, 10, 6]
-  }), []);
-
-  // Generate mock player scores - wrap in useCallback to fix dependency issues
-  // Generate mock player scores
-  const generateMockScores = useCallback(() => {
-    if (!players.length || !courseData) return [];
-    
-    const playerScores = players.map(player => {
-      // Convert handicap to strokes - typically players get strokes based on their handicap and the hole difficulty
-      const handicap = player.handicap || 12; // Default to 12 if not set
-      
-      // Generate scores for each hole
-      const holeScores = courseData.par.map((par, holeIndex) => {
-        // Random score around par based on player skill
-        const handicapAdjustment = Math.random() > 0.8 ? 1 : 0;
-        const rawScore = par + Math.floor(Math.random() * 4) - 1 + handicapAdjustment;
-        
-        // Check if player gets a handicap stroke on this hole
-        // In a traditional system, a player with handicap 9 would get strokes on the 9 hardest holes
-        const getsStroke = handicap >= courseData.handicaps[holeIndex];
-        
-        return {
-          holeNumber: holeIndex + 1,
-          par: par,
-          rawScore: rawScore,
-          handicapStroke: getsStroke ? 1 : 0,
-          netScore: getsStroke ? rawScore - 1 : rawScore
-        };
-      });
-      
-      return {
-        player: player,
-        holes: holeScores,
-        totalRawScore: holeScores.reduce((sum, hole) => sum + hole.rawScore, 0),
-        totalNetScore: holeScores.reduce((sum, hole) => sum + hole.netScore, 0)
-      };
-    });
-    
-    return playerScores;
-  }, [courseData, players]);
-
-  // Calculate skins results
-  const calculateSkins = (scores) => {
-    if (!scores.length) return [];
-    
-    const numberOfHoles = scores[0].holes.length;
-    const skinsResults = [];
-    let carryover = 0; // For tied holes
-    
-    // For each hole
-    for (let holeIndex = 0; holeIndex < numberOfHoles; holeIndex++) {
-      // Get all net scores for this hole
-      const holeScores = scores.map(playerScore => ({
-        playerId: playerScore.player.id,
-        playerName: playerScore.player.name,
-        netScore: playerScore.holes[holeIndex].netScore
-      }));
-      
-      // Find the lowest score(s)
-      const minScore = Math.min(...holeScores.map(s => s.netScore));
-      const lowestScorers = holeScores.filter(s => s.netScore === minScore);
-      
-      // If there's only one lowest score, they win the skin
-      if (lowestScorers.length === 1) {
-        const winner = lowestScorers[0];
-        skinsResults.push({
-          holeNumber: holeIndex + 1,
-          winner: winner.playerName,
-          playerId: winner.playerId,
-          value: 1 + carryover, // 1 skin plus any carryover
-          netScore: winner.netScore
-        });
-        carryover = 0;
-      } else {
-        // Tied hole, carryover
-        carryover++;
-        skinsResults.push({
-          holeNumber: holeIndex + 1,
-          winner: 'Tied - Carryover',
-          playerId: null,
-          value: 0,
-          netScore: minScore
-        });
-      }
+  // Initialize data and calculate results when players change
+  useEffect(() => {
+    if (players.length === 0) {
+      setLoading(false);
+      return;
     }
-    
-    return skinsResults;
-  };
 
-  // Load course data
-  useEffect(() => {
-    // We're always using Monarch Dunes data since that's the only course played
-    setCourseData(monarchDunesData);
-    setLoading(false);
-  }, [monarchDunesData]); // Add monarchDunesData as dependency
-
-  // Generate scores & calculate results when players or course changes
-  useEffect(() => {
-    if (courseData && players.length) {
-      const generatedScores = generateMockScores();
+    try {
+      // Generate simulated scores using the half-stroke format
+      const generatedScores = skinsCalculatorUtil.generateSimulatedScores(
+        players, 
+        MONARCH_DUNES_DATA,
+        format
+      );
       setScores(generatedScores);
       
-      const skinsResults = calculateSkins(generatedScores);
-      setResults(skinsResults);
-    }
-  }, [courseData, players, generateMockScores]); // Add generateMockScores as dependency
-
-  // Generate player summary
-  const generatePlayerSummary = () => {
-    if (!players.length || !scores.length) return [];
-    
-    const summary = players.map(player => {
-      const playerScore = scores.find(s => s.player.id === player.id);
-      if (!playerScore) return null;
+      // Calculate skins results with the specified format
+      const skins = skinsCalculatorUtil.calculateSkins(
+        generatedScores, 
+        format, 
+        MONARCH_DUNES_DATA
+      );
+      setResults(skins);
       
-      // Count skins won
-      const skinsWon = results.filter(r => r.playerId === player.id);
-      const totalSkins = skinsWon.reduce((sum, skin) => sum + skin.value, 0);
-      const skinValue = 10; // Arbitrary value per skin, e.g., $10 per skin
-      
-      return {
-        playerId: player.id,
-        playerName: player.name,
-        rawScore: playerScore.totalRawScore,
-        netScore: playerScore.totalNetScore,
-        skinsWon: totalSkins,
-        moneyWon: totalSkins * skinValue
+      // Calculate pot with CTP percentage
+      const potOptions = {
+        ctpPercentage: gameOptions.ctpPercentage,
+        // No low net or second place prizes by default
+        lowNetPercentage: 0,
+        secondPlacePercentage: 0
       };
-    }).filter(Boolean);
-    
-    // Sort by skins won (descending)
-    return summary.sort((a, b) => b.skinsWon - a.skinsWon);
-  };
+      
+      const pot = skinsCalculatorUtil.calculatePot(
+        players.length, 
+        gameOptions.entryFee, 
+        potOptions
+      );
+      
+      // Choose a random CTP winner (or use a pre-defined one if specified)
+      const ctpPlayerId = players.length > 0 ? 
+        players[Math.floor(Math.random() * players.length)].id : 
+        null;
+      
+      // Generate comprehensive player summary
+      const summary = skinsCalculatorUtil.generatePlayerSummary(
+        players,
+        generatedScores,
+        skins,
+        pot,
+        ctpPlayerId
+      );
+      
+      setPlayerSummary(summary);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error generating skins calculations:', error);
+      setLoading(false);
+    }
+  }, [players, format, gameOptions]);
 
   if (loading) {
     return <p>Loading skins calculator...</p>;
@@ -159,22 +85,21 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
     <div className="skins-calculator">
       <h3>Skins Calculation System</h3>
       
-      {/* Error display section removed as we're not using the error state currently */}
-      
       <div className="skins-explanation card">
         <h4>How Handicaps Work in Skins at Monarch Dunes</h4>
-        <p>In our skins game at Monarch Dunes, handicaps are applied on a hole-by-hole basis:</p>
+        <p>In our skins game at Monarch Dunes, handicaps are applied using half strokes:</p>
         <ol>
           <li>Each hole has a handicap rating from 1 (hardest) to 18 (easiest)</li>
-          <li>Players receive handicap strokes on holes based on their handicap index</li>
-          <li>For example, a player with a 9 handicap would receive one stroke on each of the 9 hardest holes</li>
+          <li>Players receive <strong>half stroke</strong> adjustments on holes based on their course handicap</li>
+          <li>For example, a player with a 9 handicap would receive a half stroke on the 9 hardest holes</li>
+          <li>If a player has a handicap over 18, they receive another half stroke (total of one full stroke) on holes where they would receive a stroke based on difficulty</li>
+          <li>Example: A 20 handicap player gets a half stroke on all 18 holes, plus an additional half stroke on the 2 hardest holes</li>
           <li>After applying handicap strokes, the lowest net score on each hole wins the skin</li>
-          <li>If multiple players tie for lowest net score, the skin carries over to the next hole</li>
+          <li>If multiple players tie for lowest net score, no skin is awarded for that hole (no carryover)</li>
         </ol>
+        <p className="special-note">This is a field competition - all players compete against each other for skins regardless of which group they play in.</p>
         
-        <h4>Course Information</h4>
-        <p>Monarch Dunes is a par 72 course (Front 9: par 36, Back 9: par 36)</p>
-        <h4>Monarch Dunes Hole Handicaps</h4>
+        <h4>Monarch Dunes Hole Information</h4>
         <div className="handicap-table">
           <table>
             <thead>
@@ -198,7 +123,7 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
             </tbody>
           </table>
         </div>
-        <p className="handicap-note">Note: Lower numbers indicate harder holes where players are more likely to receive handicap strokes</p>
+        <p className="handicap-note">Note: Lower difficulty numbers indicate harder holes where players are more likely to receive handicap strokes</p>
       </div>
       
       {players.length > 0 && (
@@ -210,17 +135,37 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
                 <tr>
                   <th>Hole</th>
                   <th>Winner</th>
-                  <th>Net Score</th>
-                  <th>Skins</th>
+                  <th>Score</th>
+                  <th>Type</th>
+                  <th>Value</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map(result => (
-                  <tr key={result.holeNumber}>
+                  <tr key={result.holeNumber} className={result.playerId ? 'winner-highlight' : ''}>
                     <td>{result.holeNumber}</td>
                     <td>{result.winner}</td>
-                    <td>{result.netScore}</td>
-                    <td>{result.value > 0 ? result.value : '-'}</td>
+                    <td>
+                      {result.netScore !== undefined && (
+                        <>
+                          {result.rawScore !== undefined ? (
+                            <span className="score-display">
+                              {result.rawScore}{result.handicapUsed && <sup>H</sup>} → {result.netScore}
+                            </span>
+                          ) : (
+                            result.netScore
+                          )}
+                        </>
+                      )}
+                    </td>
+                    <td>
+                      {result.scoreType && (
+                        <span className={`score-type ${result.scoreType}`}>
+                          {result.scoreType.charAt(0).toUpperCase() + result.scoreType.slice(1)}
+                        </span>
+                      )}
+                    </td>
+                    <td>{result.value > 0 ? result.value : (result.tiedPlayers ? 'Tied' : '-')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -240,18 +185,56 @@ const SkinsCalculator = ({ gameId, players = [] }) => {
                 </tr>
               </thead>
               <tbody>
-                {generatePlayerSummary().map(player => (
-                  <tr key={player.playerId}>
+                {playerSummary.map(player => (
+                  <tr key={player.playerId} className={player.totalMoney > 0 ? 'winner-highlight' : ''}>
                     <td>{player.playerName}</td>
                     <td>{player.rawScore}</td>
                     <td>{player.netScore}</td>
                     <td>{player.skinsWon}</td>
-                    <td>${player.moneyWon}</td>
+                    <td>
+                      ${player.totalMoney}
+                      {player.isCtp ? ' (includes CTP)' : ''}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          
+          {playerSummary.length > 0 && playerSummary.some(p => p.birdiesOrBetter > 0 || p.pars > 0) && (
+            <div className="player-stats card">
+              <h4>Player Stats</h4>
+              <table className="stats-table">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Birdies+</th>
+                    <th>Pars</th>
+                    <th>Net Score</th>
+                    <th>Vs. Par</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {playerSummary
+                    .sort((a, b) => (a.netScore || 0) - (b.netScore || 0))
+                    .map(player => (
+                      <tr key={player.playerId}>
+                        <td>{player.playerName}</td>
+                        <td>{player.birdiesOrBetter || 0}</td>
+                        <td>{player.pars || 0}</td>
+                        <td>{player.netScore || '-'}</td>
+                        <td className={player.relativeToPar > 0 ? 'over-par' : player.relativeToPar < 0 ? 'under-par' : ''}>
+                          {player.relativeToPar !== undefined ? (
+                            player.relativeToPar === 0 ? 'E' : 
+                            (player.relativeToPar > 0 ? '+' : '') + player.relativeToPar
+                          ) : '-'}
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
     </div>

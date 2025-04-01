@@ -65,6 +65,10 @@
   color: #666;
 }
 
+.game-item-status {
+  margin-top: 5px;
+}
+
 .selected-game-header {
   margin-bottom: 20px;
 }
@@ -175,7 +179,7 @@
   color: #6c757d;
 }
 
-.skins-calculator-container {
+.game-results-container {
   margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid #ddd;

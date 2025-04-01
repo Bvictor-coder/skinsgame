@@ -51,9 +51,11 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
           // Get all games
           const gamesData = await dataSync.getGames();
           
-          // Filter to games that are in progress or open (need scoring)
+          // Filter to games that are in progress, completed, or open (need scoring)
           const activeGamesData = gamesData.filter(game => 
-            game.status === 'in_progress' || game.status === 'open'
+            game.status === 'in_progress' || 
+            game.status === 'open' ||
+            game.status === 'completed'
           );
           
           setActiveGames(activeGamesData);

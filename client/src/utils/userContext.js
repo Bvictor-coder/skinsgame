@@ -86,26 +86,41 @@ export const UserProvider = ({ children }) => {
 
   // Login as scorekeeper for a specific game and group
   const loginAsScorekeeper = (gameId, groupIndex, playerId, playerName = null) => {
-    // During transition period, accept both formats for backward compatibility
-    // If playerId looks like an access code (for backward compatibility)
+    // Allow admin override with special codes
+    if (playerId === 'ADMIN' || playerId === 'admin') {
+      console.log('Using admin override for scorekeeper');
+      setUser({
+        role: ROLES.SCOREKEEPER,
+        id: 'admin',
+        gameId,
+        groupIndex,
+        isAdminOverride: true,
+        name: `Scorekeeper (Admin) - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
+        email: null
+      });
+      return true;
+    }
+    
+    // For legacy support - accept codes
     if (playerId === '0000' || playerId === '1234') {
       console.warn('Using deprecated access code authentication');
       setUser({
         role: ROLES.SCOREKEEPER,
-        id: null, // No player ID in the old system
+        id: 'legacy-' + playerId,
         gameId,
         groupIndex,
+        isLegacyAuth: true,
         name: `Scorekeeper - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
         email: null
       });
       return true;
     }
     
-    // New player-based authentication (preferred)
+    // Player-based authentication (primary method)
     if (playerId) {
       setUser({
         role: ROLES.SCOREKEEPER,
-        id: playerId, // Store the player's ID
+        id: playerId,
         gameId,
         groupIndex,
         name: playerName || `Scorekeeper - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
