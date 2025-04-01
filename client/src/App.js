@@ -331,34 +331,33 @@ const AppRoutes = () => {
       <Route path="/scorecard/:gameId/:groupId" element={<ScoreCardPage />} />
       
       {/* Test routes for new architecture */}
-      {process.env.NODE_ENV !== 'production' && (
-        <>
-          <Route 
-            path="/test-redux" 
-            element={
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <GameManagementRedux />
-              </React.Suspense>
-            }
-          />
-          <Route 
-            path="/test-state-machine" 
-            element={
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <GameStateMachineTest />
-              </React.Suspense>
-            }
-          />
-          <Route 
-            path="/test-db-sync" 
-            element={
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <DatabaseSyncExample />
-              </React.Suspense>
-            }
-          />
-        </>
-      )}
+      {/* Routes are now always available, even in production */}
+      <>
+        <Route 
+          path="/test-redux" 
+          element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {GameManagementRedux ? <GameManagementRedux /> : <div>Component not available in production</div>}
+            </React.Suspense>
+          }
+        />
+        <Route 
+          path="/test-state-machine" 
+          element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {GameStateMachineTest ? <GameStateMachineTest /> : <div>Component not available in production</div>}
+            </React.Suspense>
+          }
+        />
+        <Route 
+          path="/test-db-sync" 
+          element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {DatabaseSyncExample ? <DatabaseSyncExample /> : <div>Component not available in production</div>}
+            </React.Suspense>
+          }
+        />
+      </>
       
       {/* Redirect all other paths to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
