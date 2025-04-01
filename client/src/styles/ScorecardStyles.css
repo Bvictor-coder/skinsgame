@@ -511,6 +511,42 @@
   font-size: 1.2em;
 }
 
+/* Game status indicator */
+.game-status-indicator {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  gap: 6px;
+  font-size: 0.9em;
+  margin: 0 10px;
+}
+
+.status-created {
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+.status-open {
+  background-color: #cff4fc;
+  color: #055160;
+  border: 1px solid #9eeaf9;
+}
+
+.status-in_progress {
+  background-color: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffecb5;
+}
+
+.status-completed {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
 /* Radio button fixes for login form */
 .role-options label {
   color: #333;

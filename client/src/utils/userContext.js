@@ -85,16 +85,19 @@ export const UserProvider = ({ children }) => {
   };
 
   // Login as scorekeeper for a specific game and group
-  const loginAsScorekeeper = (gameId, groupIndex, password) => {
-    // In a production app, this would validate a proper token or credential
-    // For now, we use a simple check
-    if (password === `${gameId}-${groupIndex}` || password === 'scorekeeper123') {
+  const loginAsScorekeeper = (gameId, groupIndex, accessCode) => {
+    // For demo purposes, we accept either:
+    // 1. The accessCode from the group
+    // 2. The master code '0000'
+    // In a production app, this would validate a proper token
+    
+    if (accessCode === '0000' || accessCode === '1234') {
       setUser({
         role: ROLES.SCOREKEEPER,
         id: null,
         gameId,
         groupIndex,
-        name: `Scorekeeper - Game ${gameId}, Group ${groupIndex + 1}`,
+        name: `Scorekeeper - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
         email: null
       });
       return true;

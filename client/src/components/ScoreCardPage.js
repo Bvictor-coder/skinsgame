@@ -381,6 +381,13 @@ const ScoreCardPage = () => {
         };
       }
       
+      // If this is the first time scores are being entered, update game status
+      // Change status: created -> open -> in_progress -> completed
+      if (updatedGame.status === 'created' || updatedGame.status === 'open') {
+        updatedGame.status = 'in_progress';
+        console.log('Updated game status to in_progress');
+      }
+      
       // Update raw scores
       players.forEach(player => {
         const playerScoreIndex = updatedGame.scores.raw.findIndex(
@@ -767,8 +774,15 @@ const ScoreCardPage = () => {
             {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Scores'}
           </button>
           
-          {/* Only show finalize button if all holes are complete and not already finalized */}
-          {completedHolesCount() === 18 && (!game.status || game.status !== 'completed') && (
+          {/* Game Status Indicator */}
+          {game.status && (
+            <div className={`game-status-indicator status-${game.status}`}>
+              <i className="fas fa-info-circle"></i> Game Status: {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+            </div>
+          )}
+          
+          {/* Only show finalize button if all holes are complete and game is in progress */}
+          {completedHolesCount() === 18 && (game.status === 'in_progress' || game.status === 'open') && (
             <button 
               className="btn-success finalize-btn"
               onClick={() => {

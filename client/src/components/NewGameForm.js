@@ -89,8 +89,9 @@ const NewGameForm = () => {
         entryFee: formData.entryFee ? parseFloat(formData.entryFee) : null,
         ctpHole: formData.ctpHole ? parseInt(formData.ctpHole, 10) : null,
         holes: parseInt(formData.holes, 10),
-        status: 'open', // Default status for new games
-        groups: [] // Initialize with empty groups
+        status: 'created', // Initial state: created -> open -> in_progress -> completed
+        groups: [], // Initialize with empty groups
+        createdAt: new Date().toISOString(),
       };
       
       // Add to dataSync
