@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import dataSync from '../utils/dataSync';
 import SkinsCalculator from './SkinsCalculator';
+import StatusBadge from './StatusBadge';
+import '../styles/GameHistoryStyles.css';
 
 const GameHistory = () => {
   const [games, setGames] = useState([]);
@@ -143,39 +145,43 @@ const GameHistory = () => {
     return signups[selectedGame.id] || [];
   };
 
-  // Generate fake game results (since we don't have a real scoring system yet)
-  const generateFakeResults = () => {
+  // Get game results from the calculated scores in the game data
+  const getGameResults = () => {
     if (!selectedGame) return [];
     
+    // Check if the game has calculated results
+    if (selectedGame.scores && selectedGame.scores.calculated) {
+      // Use the calculated player results from the skins calculator
+      return selectedGame.scores.calculated.playerResults.map(playerResult => {
+        const player = players.find(p => p.id === playerResult.playerId);
+        
+        return {
+          playerId: playerResult.playerId,
+          name: playerResult.playerName || (player ? player.name : 'Unknown Player'),
+          handicap: player ? player.handicap : null,
+          skins: playerResult.skinsWon || 0,
+          moneyEarned: playerResult.winnings || 0,
+          isCtp: selectedGame.ctpPlayerId === playerResult.playerId
+        };
+      });
+    }
+    
+    // If no calculated results, return the active signups just to show players
     const activeSignups = getActiveSignups();
     if (activeSignups.length === 0) return [];
     
-    // Assign random scores to players
-    const results = activeSignups.map(signup => {
+    return activeSignups.map(signup => {
       const player = players.find(p => p.id === signup.playerId);
-      
-      // Generate a realistic golf score based on handicap
-      const baseScore = selectedGame.holes === 9 ? 36 : 72; // Par score
-      const handicap = player && player.handicap ? player.handicap : 12;
-      
-      // Random variance of -2 to +5 from handicap-adjusted score
-      const variance = Math.floor(Math.random() * 8) - 2;
-      const totalScore = baseScore + Math.round(handicap * (selectedGame.holes / 18)) + variance;
-      
-      // Random money earned (for demonstration)
-      const moneyEarned = Math.floor(Math.random() * 5) * 10; // $0, $10, $20, $30, or $40
       
       return {
         playerId: signup.playerId,
         name: player ? player.name : 'Unknown Player',
         handicap: player ? player.handicap : null,
-        score: totalScore,
-        moneyEarned: moneyEarned
+        skins: 0,
+        moneyEarned: 0, 
+        isCtp: selectedGame.ctpPlayerId === signup.playerId
       };
     });
-    
-    // Sort by score (lowest first)
-    return results.sort((a, b) => a.score - b.score);
   };
 
   return (
@@ -238,6 +244,20 @@ const GameHistory = () => {
                 <div className="results-container card">
                   <h4>Results & Payouts</h4>
                   
+                  {selectedGame.status === 'finalized' ? (
+                    <div className="finalized-badge">
+                      <span className="game-finalized">Game Finalized</span>
+                    </div>
+                  ) : selectedGame.status === 'completed' ? (
+                    <div className="completed-badge">
+                      <span className="game-completed">Game Completed</span>
+                    </div>
+                  ) : (
+                    <div className="status-badge">
+                      <StatusBadge status={selectedGame.status || 'created'} />
+                    </div>
+                  )}
+                  
                   {getActiveSignups().length === 0 ? (
                     <p className="empty-state">No player data available for this game</p>
                   ) : (
@@ -247,32 +267,28 @@ const GameHistory = () => {
                           <th>Place</th>
                           <th>Player</th>
                           <th>Handicap</th>
-                          <th>Score</th>
+                          <th>Skins</th>
                           <th>Winnings</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {generateFakeResults().map((result, index) => (
-                          <tr key={result.playerId}>
+                        {getGameResults().map((result, index) => (
+                          <tr key={result.playerId} className={result.skins > 0 || result.isCtp ? 'winner-highlight' : ''}>
                             <td>{index + 1}</td>
                             <td>{result.name}</td>
                             <td>{result.handicap !== null ? result.handicap : '-'}</td>
-                            <td>{result.score}</td>
-                            <td>${result.moneyEarned}</td>
+                            <td>{result.skins}</td>
+                            <td>${result.moneyEarned}{result.isCtp ? ' + CTP' : ''}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   )}
                   
-                  {selectedGame.ctpHole && (
+                  {selectedGame.ctpPlayerId && (
                     <div className="ctp-winner">
-                      <h4>Closest to Pin (Hole {selectedGame.ctpHole})</h4>
-                      <p>
-                        {getActiveSignups().length > 0 
-                          ? getPlayerName(getActiveSignups()[Math.floor(Math.random() * getActiveSignups().length)].playerId)
-                          : 'No players'}
-                      </p>
+                      <h4>Closest to Pin Winner</h4>
+                      <p>{getPlayerName(selectedGame.ctpPlayerId)}</p>
                     </div>
                   )}
                 </div>

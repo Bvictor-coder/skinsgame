@@ -39,7 +39,12 @@ const GameManagement = () => {
   const updateGameStatus = async (gameId, newStatus) => {
     try {
       const gameData = games.find(g => g.id === gameId);
-      if (!gameData) return;
+      if (!gameData) {
+        console.error(`Game with ID ${gameId} not found`);
+        return false;
+      }
+      
+      console.log(`Updating game ${gameId} status to ${newStatus}`);
       
       const updatedGame = {
         ...gameData,
@@ -47,26 +52,44 @@ const GameManagement = () => {
         statusUpdatedAt: new Date().toISOString()
       };
       
-      // Add specific timestamp for certain statuses
-      if (newStatus === 'open') {
-        updatedGame.openedAt = new Date().toISOString();
-      } else if (newStatus === 'enrollment_complete') {
-        updatedGame.enrollmentCompletedAt = new Date().toISOString();
-      } else if (newStatus === 'in_progress') {
-        updatedGame.startedAt = new Date().toISOString();
-      } else if (newStatus === 'completed') {
-        updatedGame.completedAt = new Date().toISOString();
-      } else if (newStatus === 'finalized') {
-        updatedGame.finalizedAt = new Date().toISOString();
+      // Ensure the scores object exists
+      if (!updatedGame.scores) {
+        updatedGame.scores = { raw: [] };
       }
       
-      await dataSync.updateGame(updatedGame);
+      // Special handling for finalized status to ensure calculated results are preserved
+      if (newStatus === 'finalized') {
+        // Check if there are calculated results from the scorecard
+        const currentGame = await dataSync.getGames().then(
+          games => games.find(g => g.id === gameId)
+        );
+        
+        if (currentGame && currentGame.scores && currentGame.scores.calculated) {
+          console.log('Preserving calculated scores during finalization');
+          // Ensure calculated results are preserved
+          updatedGame.scores = {
+            ...updatedGame.scores,
+            calculated: currentGame.scores.calculated
+          };
+        } else {
+          console.warn('No calculated scores found when finalizing game');
+        }
+      }
+      
+      // Perform the update with the complete game object
+      const result = await dataSync.updateGame(updatedGame);
+      
+      if (!result) {
+        console.error(`Failed to update game ${gameId} status`);
+        return false;
+      }
       
       // Update local state
       setGames(prev => 
         prev.map(g => g.id === gameId ? updatedGame : g)
       );
       
+      console.log(`Successfully updated game ${gameId} status to ${newStatus}`);
       return true;
     } catch (err) {
       console.error('Error updating game status:', err);

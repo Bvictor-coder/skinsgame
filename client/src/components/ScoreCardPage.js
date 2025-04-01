@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
 import { calculateGameSkins } from '../utils/skinsCalculator';
 import CtpSelectionModal from './CtpSelectionModal';
+import { useUser, ROLES } from '../utils/userContext';
 import '../styles/ScorecardStyles.css';
 
 // Assuming we have this data from monarch-dunes.js; we'll hardcode for now
@@ -50,6 +51,37 @@ const ScoreCardPage = () => {
   const [calculatedResults, setCalculatedResults] = useState(null);
   const [viewMode, setViewMode] = useState('score'); // 'score' or 'results'
   const [resultsTab, setResultsTab] = useState('holes'); // 'holes' or 'players'
+  
+  // Get the current user for authentication
+  const { user } = useUser();
+  
+  // Verify authorization on component mount
+  useEffect(() => {
+    const verifyAuthorization = async () => {
+      // Admin can access all scorecards
+      if (user.role === ROLES.ADMIN) {
+        return true;
+      }
+      
+      // Scorekeeper can only access their assigned scorecard
+      if (user.role === ROLES.SCOREKEEPER) {
+        if (user.gameId === gameId && 
+            user.groupIndex.toString() === groupId.toString()) {
+          return true;
+        } else {
+          setError('You do not have permission to access this scorecard.');
+          return false;
+        }
+      }
+      
+      // Player role currently doesn't have access to scorecards directly
+      // This could be enhanced to allow players to view but not edit their group's scorecard
+      setError('Please log in as a scorekeeper or admin to access this scorecard.');
+      return false;
+    };
+    
+    verifyAuthorization();
+  }, [user, gameId, groupId]);
   
   // Load game and player data
   useEffect(() => {

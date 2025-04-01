@@ -1,4 +1,11 @@
 import api from './api.js';
+import { 
+  debugLogger, 
+  storageMonitor, 
+  dataValidator, 
+  lifecycleTracer, 
+  initializeDebugDashboard 
+} from './debugTools.js';
 
 /**
  * DataSync service for handling data synchronization between localStorage and API
@@ -8,6 +15,8 @@ import api from './api.js';
  * 1. localStorage-only mode (legacy)
  * 2. API mode with localStorage backup
  * 3. Hybrid mode where we read from both sources and sync data
+ * 
+ * Enhanced with debugging and validation to track data issues.
  */
 class DataSyncService {
   constructor() {
@@ -19,6 +28,15 @@ class DataSyncService {
       signups: {} 
     };
     this.initialized = false;
+    
+    // Track operating mode
+    debugLogger.log('DATASYNC', `Initialized in ${this.useApi ? 'API+localStorage' : 'localStorage-only'} mode`);
+    
+    // Initialize debug dashboard in development
+    if (process.env.NODE_ENV !== 'production') {
+      initializeDebugDashboard();
+      debugLogger.log('DATASYNC', 'Debug dashboard initialized');
+    }
   }
 
   /**
@@ -46,44 +64,154 @@ class DataSyncService {
 
   /**
    * Load data from localStorage with safety checks for SSR environments
+   * Enhanced with validation and error recovery
    */
   loadFromLocalStorage() {
     try {
       // Check if localStorage is available (this prevents SSR errors)
       if (typeof window !== 'undefined' && window.localStorage) {
         const savedData = localStorage.getItem(this.localStorageKey);
+        
+        debugLogger.log('DATASYNC:LOAD', 'Attempting to load data from localStorage');
+        
         if (savedData) {
-          this.localData = JSON.parse(savedData);
-          
-          // Ensure proper structure
-          if (!this.localData.friends) this.localData.friends = [];
-          if (!this.localData.games) this.localData.games = [];
-          if (!this.localData.signups) this.localData.signups = {};
-          
-          console.log('Data loaded from localStorage');
+          try {
+            const parsedData = JSON.parse(savedData);
+            storageMonitor.trackLoad(this.localStorageKey, parsedData);
+            
+            // Validate structure and recover if needed
+            const validatedData = this.validateAndRecoverData(parsedData);
+            this.localData = validatedData;
+            
+            debugLogger.log('DATASYNC:LOAD', `Successfully loaded data with ${this.localData.games.length} games, ${this.localData.friends.length} friends`);
+          } catch (parseError) {
+            debugLogger.error('DATASYNC:LOAD', 'Error parsing localStorage JSON:', parseError);
+            // Recovery: keep default empty data structure
+            debugLogger.warn('DATASYNC:LOAD', 'Using default empty data structure due to parsing error');
+          }
+        } else {
+          debugLogger.warn('DATASYNC:LOAD', 'No data found in localStorage, using default empty structure');
         }
       } else {
-        console.log('localStorage not available, using default data structure');
+        debugLogger.log('DATASYNC:LOAD', 'localStorage not available (possible SSR), using default data structure');
       }
     } catch (error) {
-      console.error('Error loading data from localStorage:', error);
+      debugLogger.error('DATASYNC:LOAD', 'Critical error in loadFromLocalStorage:', error);
     }
+  }
+  
+  /**
+   * Validate loaded data and recover from common issues
+   */
+  validateAndRecoverData(data) {
+    debugLogger.log('DATASYNC:VALIDATE', 'Validating loaded data structure');
+    
+    // Start with a good default structure
+    const validData = {
+      friends: [],
+      games: [],
+      signups: {}
+    };
+    
+    // Check and recover friends array
+    if (Array.isArray(data.friends)) {
+      validData.friends = data.friends.filter(friend => {
+        const isValid = dataValidator.validateFriend(friend);
+        if (!isValid) {
+          debugLogger.warn('DATASYNC:VALIDATE', `Filtered out invalid friend object:`, friend);
+        }
+        return isValid;
+      });
+      debugLogger.log('DATASYNC:VALIDATE', `Validated ${validData.friends.length} friends`);
+    } else {
+      debugLogger.warn('DATASYNC:VALIDATE', 'Friends data is not an array or is missing, using empty array');
+    }
+    
+    // Check and recover games array
+    if (Array.isArray(data.games)) {
+      validData.games = data.games.filter(game => {
+        // Add missing fields to prevent errors
+        if (!game.scores) {
+          game.scores = { raw: [] };
+          debugLogger.warn('DATASYNC:VALIDATE', `Added missing scores object to game ${game.id}`);
+        }
+        
+        const isValid = dataValidator.validateGame(game);
+        if (!isValid) {
+          debugLogger.warn('DATASYNC:VALIDATE', `Filtered out invalid game object:`, game);
+        }
+        return isValid;
+      });
+      debugLogger.log('DATASYNC:VALIDATE', `Validated ${validData.games.length} games`);
+    } else {
+      debugLogger.warn('DATASYNC:VALIDATE', 'Games data is not an array or is missing, using empty array');
+    }
+    
+    // Check and recover signups object
+    if (data.signups && typeof data.signups === 'object') {
+      // Copy valid signups
+      Object.entries(data.signups).forEach(([gameId, signupsList]) => {
+        if (Array.isArray(signupsList)) {
+          validData.signups[gameId] = signupsList.filter(signup => {
+            const isValid = dataValidator.validateSignup(signup, gameId);
+            if (!isValid) {
+              debugLogger.warn('DATASYNC:VALIDATE', `Filtered out invalid signup for game ${gameId}:`, signup);
+            }
+            return isValid;
+          });
+        } else {
+          debugLogger.warn('DATASYNC:VALIDATE', `Signups for game ${gameId} is not an array, skipping`);
+        }
+      });
+    } else {
+      debugLogger.warn('DATASYNC:VALIDATE', 'Signups data is not an object or is missing, using empty object');
+    }
+    
+    return validData;
   }
 
   /**
    * Save data to localStorage with safety checks for SSR environments
+   * Enhanced with pre-save validation and error handling
    */
   saveToLocalStorage() {
     try {
       // Check if localStorage is available (this prevents SSR errors)
       if (typeof window !== 'undefined' && window.localStorage) {
+        debugLogger.log('DATASYNC:SAVE', 'Preparing to save data to localStorage');
+        
+        // Validate data before saving to prevent corruption
+        const games = this.localData.games || [];
+        const friends = this.localData.friends || [];
+        const signups = this.localData.signups || {};
+        
+        // Check if we have valid game objects
+        games.forEach(game => {
+          if (!dataValidator.validateGame(game)) {
+            debugLogger.warn('DATASYNC:SAVE', `Game ${game.id} failed validation but will be saved anyway:`, game);
+          }
+        });
+        
+        // Log storage operation details
+        storageMonitor.trackSave(this.localStorageKey, this.localData);
+        
+        // Actual save
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.localData));
-        console.log('Data saved to localStorage');
+        debugLogger.log('DATASYNC:SAVE', `Saved ${games.length} games, ${friends.length} friends to localStorage`);
       } else {
-        console.log('localStorage not available, data not saved');
+        debugLogger.log('DATASYNC:SAVE', 'localStorage not available (possible SSR), data not saved');
       }
     } catch (error) {
-      console.error('Error saving data to localStorage:', error);
+      debugLogger.error('DATASYNC:SAVE', 'Error saving data to localStorage:', error);
+      // Attempt recovery - store in sessionStorage as backup if available
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem('golfSkins_emergency_backup', JSON.stringify(this.localData));
+          debugLogger.warn('DATASYNC:SAVE', 'Created emergency backup in sessionStorage after localStorage save failure');
+        }
+      } catch (backupErr) {
+        debugLogger.error('DATASYNC:SAVE', 'Failed to create emergency backup:', backupErr);
+      }
     }
   }
 
@@ -474,13 +602,36 @@ class DataSyncService {
 
   /**
    * Update a game
+   * This method handles both full game objects and partial updates
+   * Enhanced with lifecycle tracking and validation
    */
-  async updateGame(id, gameData) {
+  async updateGame(gameOrId, gameData) {
     await this.ensureInitialized();
+    
+    // Handle the case where a full game object is passed
+    let id, updateData;
+    
+    if (typeof gameOrId === 'object' && gameOrId !== null) {
+      // Full game object passed
+      id = gameOrId.id;
+      updateData = gameOrId;
+    } else {
+      // ID and partial update data passed
+      id = gameOrId;
+      updateData = gameData;
+    }
+
+    if (!id) {
+      debugLogger.error('DATASYNC:UPDATE_GAME', 'Cannot update game: No ID provided');
+      return null;
+    }
+    
+    debugLogger.group('DATASYNC:UPDATE_GAME', `Updating game ${id}`);
     
     if (this.useApi) {
       try {
-        const response = await api.games.update(id, gameData);
+        debugLogger.log('DATASYNC:UPDATE_GAME', 'Updating game using API');
+        const response = await api.games.update(id, updateData);
         const updatedGame = response.data;
         
         this.localData.games = this.localData.games.map(g => 
@@ -488,20 +639,88 @@ class DataSyncService {
         );
         
         this.saveToLocalStorage();
+        debugLogger.log('DATASYNC:UPDATE_GAME', 'Game updated successfully via API');
+        debugLogger.groupEnd();
         return updatedGame;
       } catch (error) {
-        console.error('Error updating game on API:', error);
+        debugLogger.error('DATASYNC:UPDATE_GAME', 'Error updating game on API:', error);
       }
     }
     
     // Update in local storage
     const index = this.localData.games.findIndex(g => g.id === id);
     if (index !== -1) {
-      this.localData.games[index] = { ...this.localData.games[index], ...gameData };
+      const oldGame = {...this.localData.games[index]};
+      const oldStatus = oldGame.status;
+      
+      // Create updated game
+      const updatedGame = { ...oldGame, ...updateData };
+      
+      // Ensure scores object is properly structured
+      if (!updatedGame.scores) {
+        updatedGame.scores = { raw: [] };
+      }
+      
+      // Track lifecycle status changes
+      if (updateData.status && updateData.status !== oldStatus) {
+        debugLogger.log('DATASYNC:UPDATE_GAME', `Status change detected: ${oldStatus} -> ${updateData.status}`);
+        lifecycleTracer.traceStateChange(id, oldStatus, updateData.status);
+        
+        // Add transition timestamp
+        const timestamp = new Date().toISOString();
+        
+        switch (updateData.status) {
+          case 'created':
+            updatedGame.createdAt = timestamp;
+            break;
+          case 'open':
+            updatedGame.openedAt = timestamp;
+            break;
+          case 'enrollment_complete':
+            updatedGame.enrollmentCompletedAt = timestamp;
+            break;
+          case 'in_progress':
+            updatedGame.startedAt = timestamp;
+            break;
+          case 'completed':
+            updatedGame.completedAt = timestamp;
+            break;
+          case 'finalized':
+            updatedGame.finalizedAt = timestamp;
+            break;
+        }
+      }
+      
+      // Special handling for calculated scores
+      if (oldGame.scores && oldGame.scores.calculated && 
+          (!updateData.scores || !updateData.scores.calculated)) {
+        debugLogger.log('DATASYNC:UPDATE_GAME', 'Preserving calculated scores during update');
+        if (!updatedGame.scores) updatedGame.scores = {};
+        updatedGame.scores.calculated = oldGame.scores.calculated;
+      }
+      
+      // Validate the game before saving
+      if (!dataValidator.validateGame(updatedGame)) {
+        debugLogger.warn('DATASYNC:UPDATE_GAME', 'Updated game failed validation but will be saved:', updatedGame);
+      }
+      
+      // Update the game in the array
+      this.localData.games[index] = updatedGame;
+      
+      // Save changes to localStorage
       this.saveToLocalStorage();
-      return this.localData.games[index];
+      
+      debugLogger.log('DATASYNC:UPDATE_GAME', `Game ${id} successfully updated in localStorage`);
+      
+      // Display updated lifecycle history
+      lifecycleTracer.displayLifecycleHistory(updatedGame);
+      
+      debugLogger.groupEnd();
+      return updatedGame;
     }
     
+    debugLogger.error('DATASYNC:UPDATE_GAME', `Game with ID ${id} not found in local storage`);
+    debugLogger.groupEnd();
     return null;
   }
 

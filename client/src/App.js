@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider as ReduxProvider } from 'react-redux';
 import { UserProvider, useUser, ROLES } from './utils/userContext';
+import store from './store';
+import { initializeApp } from './store/actions/syncActions';
 import Header from './components/Header';
 import PlayersManagement from './components/PlayersManagement';
 import NewGameForm from './components/NewGameForm';
@@ -12,6 +15,8 @@ import PlayerSignUp from './components/PlayerSignUp';
 import ScoreCardPage from './components/ScoreCardPage';
 import GameManagement from './components/GameManagement';
 import dataSync from './utils/dataSync';
+import { initializeDebugDashboard } from './utils/debugTools';
+import DebugPanel from './components/DebugPanel';
 import './styles.css'; // Import our enhanced styles
 import './styles/ManualAdjustmentStyles.css'; // Import manual adjustment interface styles
 import './styles/ShotgunStartStyles.css'; // Import shotgun start styles
@@ -20,6 +25,17 @@ import './styles/GameManagementStyles.css'; // Import game management styles
 
 // Import the simplified component for debugging
 import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
+
+// Import test components when in development
+const GameManagementRedux = process.env.NODE_ENV !== 'production' 
+  ? React.lazy(() => import('./components/examples/GameManagementRedux'))
+  : null;
+const GameStateMachineTest = process.env.NODE_ENV !== 'production'
+  ? React.lazy(() => import('./components/examples/GameStateMachineTest'))
+  : null;
+const DatabaseSyncExample = process.env.NODE_ENV !== 'production'
+  ? React.lazy(() => import('./components/examples/DatabaseSyncExample'))
+  : null;
 
 // Set this to true to use the simplified version for debugging
 const USE_SIMPLIFIED_GROUPS = false;
@@ -31,13 +47,22 @@ const AppContent = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('upcoming');
   
-  // Initialize data
+  // Initialize data and debug tools
   useEffect(() => {
     const initializeData = async () => {
       try {
         setLoading(true);
         // Initialize data from localStorage and sync with server
         await dataSync.initialize();
+        
+        // Initialize debug dashboard in development
+        if (process.env.NODE_ENV !== 'production') {
+          initializeDebugDashboard();
+          console.log('%c🏌️‍♂️ Golf Skins Debug Dashboard Available 🏌️‍♀️', 
+            'background: #2a9d8f; color: white; padding: 8px; border-radius: 4px; font-size: 14px;');
+          console.log('Type GolfSkinsDebug in the console to access debugging tools');
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error initializing data:', err);
@@ -305,6 +330,36 @@ const AppRoutes = () => {
       {/* Scorecard page with gameId and groupId parameters */}
       <Route path="/scorecard/:gameId/:groupId" element={<ScoreCardPage />} />
       
+      {/* Test routes for new architecture */}
+      {process.env.NODE_ENV !== 'production' && (
+        <>
+          <Route 
+            path="/test-redux" 
+            element={
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <GameManagementRedux />
+              </React.Suspense>
+            }
+          />
+          <Route 
+            path="/test-state-machine" 
+            element={
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <GameStateMachineTest />
+              </React.Suspense>
+            }
+          />
+          <Route 
+            path="/test-db-sync" 
+            element={
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <DatabaseSyncExample />
+              </React.Suspense>
+            }
+          />
+        </>
+      )}
+      
       {/* Redirect all other paths to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -313,12 +368,22 @@ const AppRoutes = () => {
 
 // Root component that wraps the app with providers and router
 const App = () => {
+  useEffect(() => {
+    // Initialize the Redux store
+    store.dispatch(initializeApp());
+  }, []);
+
   return (
-    <UserProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </UserProvider>
+    <ReduxProvider store={store}>
+      <UserProvider>
+        <Router>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <AppRoutes />
+          </React.Suspense>
+          {process.env.NODE_ENV !== 'production' && <DebugPanel />}
+        </Router>
+      </UserProvider>
+    </ReduxProvider>
   );
 };
 

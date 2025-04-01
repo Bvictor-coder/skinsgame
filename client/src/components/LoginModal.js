@@ -10,51 +10,25 @@ import dataSync from '../utils/dataSync';
 const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
   const [role, setRole] = useState('');
   const [playerId, setPlayerId] = useState('');
-  // accessCode state removed as it's no longer needed with the new scorekeeper login approach
   const [error, setError] = useState('');
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
   const { loginAsAdmin, loginAsPlayer, loginAsScorekeeper } = useUser();
   
-  // Load players for the dropdown when the modal opens
+  // New state for scorekeeper selection
+  const [activeGames, setActiveGames] = useState([]);
+  const [selectedGame, setSelectedGame] = useState(gameId || '');
+  const [gameGroups, setGameGroups] = useState([]);
+  
+  // Load players for regular player selection (not scorekeeper)
   useEffect(() => {
     const loadPlayers = async () => {
-      if (isOpen && (role === 'player' || role === 'scorekeeper')) {
+      if (isOpen && role === 'player') {
         setLoading(true);
         try {
           // Get all players
           const allPlayers = await dataSync.getFriends();
-          
-          // If we're in scorekeeper mode and have a gameId/groupIndex,
-          // we need to filter to show only the designated scorekeeper
-          if (role === 'scorekeeper' && gameId && groupIndex !== undefined) {
-            const gamesData = await dataSync.getGames();
-            const game = gamesData.find(g => g.id === gameId);
-            
-            if (game && game.groups && game.groups[groupIndex]) {
-              const group = game.groups[groupIndex];
-              
-              // If this group has a designated scorekeeper, filter the players list
-              if (group.scorekeeperId) {
-                const scorekeeperPlayer = allPlayers.find(p => p.id === group.scorekeeperId);
-                if (scorekeeperPlayer) {
-                  setPlayers([scorekeeperPlayer]);
-                } else {
-                  // If we can't find the scorekeeper in the players list, show all
-                  setPlayers(allPlayers || []);
-                }
-              } else {
-                // No designated scorekeeper, show all players
-                setPlayers(allPlayers || []);
-              }
-            } else {
-              // Game or group not found, show all players
-              setPlayers(allPlayers || []);
-            }
-          } else {
-            // For player role, just show all players
-            setPlayers(allPlayers || []);
-          }
+          setPlayers(allPlayers || []);
         } catch (err) {
           console.error('Error loading players:', err);
           setError('Unable to load players. Please try again.');
@@ -65,34 +39,103 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
     };
     
     loadPlayers();
-  }, [isOpen, role, gameId, groupIndex]);
+  }, [isOpen, role]);
   
-  // Load game data for scorekeeper code validation
+  // Load active games for scorekeeper role
   useEffect(() => {
-    const loadGameData = async () => {
-      if (isOpen && role === 'scorekeeper' && gameId && groupIndex !== undefined) {
+    const loadActiveGames = async () => {
+      if (isOpen && role === 'scorekeeper') {
+        setLoading(true);
         try {
-          // Try to get the simple access code from the group
+          // Get all games
           const gamesData = await dataSync.getGames();
-          const game = gamesData.find(g => g.id === gameId);
           
-          if (game && game.groups && game.groups[groupIndex]) {
-            const group = game.groups[groupIndex];
-            
-            // Check if the group has an accessCode property
-            if (group.accessCode) {
-              // Show a hint about the access code format
-              console.log('Access code is available:', group.accessCode);
-            }
+          // Filter to games that are in progress or open (need scoring)
+          const activeGamesData = gamesData.filter(game => 
+            game.status === 'in_progress' || game.status === 'open'
+          );
+          
+          setActiveGames(activeGamesData);
+          
+          // If gameId is provided via props, set it as selected
+          if (gameId) {
+            setSelectedGame(gameId);
+            // Load scorekeeper info for this game
+            await loadScorekeeperForGame(gameId, groupIndex);
+          } else if (activeGamesData.length > 0) {
+            // Otherwise, select the first active game by default
+            setSelectedGame(activeGamesData[0].id);
           }
+          
         } catch (err) {
-          console.error('Error loading game data for access code:', err);
+          console.error('Error loading active games:', err);
+          setError('Unable to load active games. Please try again.');
+        } finally {
+          setLoading(false);
         }
       }
     };
     
-    loadGameData();
+    loadActiveGames();
   }, [isOpen, role, gameId, groupIndex]);
+  
+  // Load scorekeeper info when a game is selected
+  const loadScorekeeperForGame = async (gameId, specificGroupIndex = null) => {
+    if (!gameId) return;
+    
+    try {
+      // Get all players
+      const allPlayers = await dataSync.getFriends();
+      
+      // Find the selected game
+      const gamesData = await dataSync.getGames();
+      const selectedGameData = gamesData.find(g => g.id === gameId);
+      
+      if (!selectedGameData || !selectedGameData.groups) {
+        setError('Selected game has no groups');
+        return;
+      }
+      
+      setGameGroups(selectedGameData.groups);
+      
+      // If a specific group is provided, only show its scorekeeper
+      if (specificGroupIndex !== null && selectedGameData.groups[specificGroupIndex]) {
+        const group = selectedGameData.groups[specificGroupIndex];
+        
+        if (group.scorekeeperId) {
+          const scorekeeperPlayer = allPlayers.find(p => p.id === group.scorekeeperId);
+          if (scorekeeperPlayer) {
+            setPlayers([{
+              ...scorekeeperPlayer,
+              groupIndex: specificGroupIndex
+            }]);
+            return;
+          }
+        }
+      }
+      
+      // Otherwise, find all scorekeepers across groups
+      const scorekeepers = selectedGameData.groups
+        .filter(group => group.scorekeeperId)
+        .map((group, index) => {
+          const player = allPlayers.find(p => p.id === group.scorekeeperId);
+          if (player) {
+            return {
+              ...player,
+              groupIndex: index
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+      
+      setPlayers(scorekeepers);
+      
+    } catch (err) {
+      console.error('Error loading scorekeepers:', err);
+      setError('Failed to load scorekeeper information');
+    }
+  };
   
   // Don't render if not open
   if (!isOpen) return null;
@@ -114,32 +157,54 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
         setError('Please select a player');
       }
     } else if (role === 'scorekeeper') {
-      // For scorekeeper, ensure a scorekeeper is selected
+      // For scorekeeper, need a selected game and player
+      if (!selectedGame && !gameId) {
+        setError('Please select a game');
+        return;
+      }
+      
+      const effectiveGameId = gameId || selectedGame;
+      
       if (!playerId) {
         setError('Please select a scorekeeper');
         return;
       }
       
       try {
-        // Get the game data to verify the scorekeeper is valid for this group
-        const gamesData = await dataSync.getGames();
-        const game = gamesData.find(g => g.id === gameId);
-        
-        if (!game) {
-          setError('Game not found. Please check the link and try again.');
+        // Find the selected player to get the group index
+        const selectedPlayer = players.find(p => p.id === playerId);
+        if (!selectedPlayer) {
+          setError('Selected player not found');
           return;
         }
         
-        const group = game.groups && game.groups[groupIndex];
+        // Get group index from either the URL params or the selected player
+        const effectiveGroupIndex = groupIndex !== undefined ? 
+          groupIndex : selectedPlayer.groupIndex;
+        
+        // Get the game data to verify the scorekeeper is valid for this group
+        const gamesData = await dataSync.getGames();
+        const game = gamesData.find(g => g.id === effectiveGameId);
+        
+        if (!game) {
+          setError('Game not found. Please check the game selection.');
+          return;
+        }
+        
+        const group = game.groups && game.groups[effectiveGroupIndex];
         
         if (!group) {
-          setError('Group not found. Please check the link and try again.');
+          setError('Group not found within this game.');
           return;
         }
         
         // Check if this player is the designated scorekeeper for this group
         if (playerId === group.scorekeeperId) {
-          loginAsScorekeeper(gameId, groupIndex, playerId);
+          // Get player name for better display
+          const playerName = selectedPlayer.name || 'Scorekeeper';
+          
+          // Use updated loginAsScorekeeper with player ID and name
+          loginAsScorekeeper(effectiveGameId, effectiveGroupIndex, playerId, playerName);
           onClose();
         } else {
           setError('You are not the designated scorekeeper for this group.');
@@ -243,17 +308,25 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
             <div className="form-group">
               <label>Select Game:</label>
               <select 
-                value={gameId || ''}
+                value={selectedGame || gameId || ''}
                 onChange={(e) => {
-                  // This would normally update gameId, but we're using the one from props
-                  console.log('Would select game:', e.target.value);
+                  const newGameId = e.target.value;
+                  setSelectedGame(newGameId);
+                  setPlayerId(''); // Reset player selection when game changes
+                  if (newGameId) {
+                    loadScorekeeperForGame(newGameId);
+                  }
                 }}
                 disabled={gameId ? true : false}
               >
-                {gameId ? (
+                <option value="">-- Select Active Game --</option>
+                {activeGames.map(game => (
+                  <option key={game.id} value={game.id}>
+                    {new Date(game.date).toLocaleDateString()} - {game.courseName} - Group {game.groups?.length || 0}
+                  </option>
+                ))}
+                {gameId && !activeGames.find(g => g.id === gameId) && (
                   <option value={gameId}>Current Game</option>
-                ) : (
-                  <option value="">-- Select Game --</option>
                 )}
               </select>
               
@@ -268,14 +341,20 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
                   <option value="">-- Select Your Name --</option>
                   {players.map(player => (
                     <option key={player.id} value={player.id}>
-                      {player.name}
+                      {player.name} - Group {player.groupIndex + 1}
                     </option>
                   ))}
                 </select>
               )}
               
+              {players.length === 0 && !loading && (
+                <div className="info-message warn">
+                  No scorekeepers found for this game. Scorekeepers must be assigned by an admin.
+                </div>
+              )}
+              
               <div className="scorekeeper-info">
-                <p>You must be the designated scorekeeper for this group.</p>
+                <p><strong>Note:</strong> You must be the designated scorekeeper for a group to enter scores.</p>
               </div>
             </div>
           )}

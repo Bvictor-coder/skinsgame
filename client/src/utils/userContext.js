@@ -85,16 +85,14 @@ export const UserProvider = ({ children }) => {
   };
 
   // Login as scorekeeper for a specific game and group
-  const loginAsScorekeeper = (gameId, groupIndex, accessCode) => {
-    // For demo purposes, we accept either:
-    // 1. The accessCode from the group
-    // 2. The master code '0000'
-    // In a production app, this would validate a proper token
-    
-    if (accessCode === '0000' || accessCode === '1234') {
+  const loginAsScorekeeper = (gameId, groupIndex, playerId, playerName = null) => {
+    // During transition period, accept both formats for backward compatibility
+    // If playerId looks like an access code (for backward compatibility)
+    if (playerId === '0000' || playerId === '1234') {
+      console.warn('Using deprecated access code authentication');
       setUser({
         role: ROLES.SCOREKEEPER,
-        id: null,
+        id: null, // No player ID in the old system
         gameId,
         groupIndex,
         name: `Scorekeeper - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
@@ -102,6 +100,20 @@ export const UserProvider = ({ children }) => {
       });
       return true;
     }
+    
+    // New player-based authentication (preferred)
+    if (playerId) {
+      setUser({
+        role: ROLES.SCOREKEEPER,
+        id: playerId, // Store the player's ID
+        gameId,
+        groupIndex,
+        name: playerName || `Scorekeeper - Game ${gameId}, Group ${parseInt(groupIndex) + 1}`,
+        email: null
+      });
+      return true;
+    }
+    
     return false;
   };
 

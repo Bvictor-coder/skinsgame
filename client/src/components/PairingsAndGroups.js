@@ -327,15 +327,34 @@ const PairingsAndGroups = () => {
       setError('');
       setSuccess('');
       
+      console.log("Saving groups:", groups);
+      
       // Prepare playerIds array for each group
       const formattedGroups = groups.map(group => {
-        // Convert player objects to just playerIds array
+        // Ensure we have player objects with playerIds
+        if (!group.players || !Array.isArray(group.players)) {
+          console.error("Invalid group player data:", group);
+          throw new Error(`Group ${group.id} has invalid player data`);
+        }
+        
+        // Convert player objects to just playerIds array, ensuring playerId exists
+        const playerIds = group.players
+          .filter(player => player && player.playerId) // Filter out invalid players
+          .map(player => player.playerId);
+          
+        console.log(`Group ${group.id} playerIds:`, playerIds);
+        
+        if (playerIds.length === 0) {
+          console.warn(`Group ${group.id} has no valid players`);
+        }
+        
         return {
           id: group.id,
-          playerIds: group.players.map(player => player.playerId),
+          playerIds: playerIds, // Use the filtered playerIds
           startingHole: group.startingHole,
           startingPosition: group.startingPosition,
-          scorekeeperId: group.scorekeeperId
+          scorekeeperId: group.scorekeeperId,
+          accessCode: group.accessCode || Math.floor(1000 + Math.random() * 9000).toString()
         };
       });
       
@@ -345,8 +364,10 @@ const PairingsAndGroups = () => {
         groups: formattedGroups
       };
       
+      console.log("Updating game with groups:", formattedGroups);
+      
       // Use dataSync service to update the game
-      await dataSync.updateGame(selectedGame.id, updatedGame);
+      await dataSync.updateGame(updatedGame);
       
       // Update selected game in state
       setSelectedGame(updatedGame);

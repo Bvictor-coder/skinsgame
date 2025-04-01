@@ -1,0 +1,223 @@
+/* Game History Styles */
+.game-history {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.date-range {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.history-container {
+  display: flex;
+  gap: 20px;
+}
+
+.games-sidebar {
+  flex: 0 0 300px;
+  border-right: 1px solid #ddd;
+  padding-right: 20px;
+}
+
+.game-details-panel {
+  flex: 1;
+}
+
+.game-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.game-item {
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.game-item:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.game-item.active {
+  border-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.game-date {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.game-course {
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+.game-time, .game-info {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.selected-game-header {
+  margin-bottom: 20px;
+}
+
+.selected-game-header h3 {
+  margin: 0 0 10px 0;
+}
+
+.selected-game-info {
+  color: #666;
+}
+
+.game-notes {
+  font-style: italic;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-left: 3px solid #007bff;
+}
+
+.results-container {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.results-table th {
+  background-color: #f8f9fa;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+
+.results-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table .winner-highlight {
+  background-color: #d4edda;
+}
+
+.player-list {
+  margin-bottom: 20px;
+}
+
+.player-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.player-chip {
+  background-color: #e9ecef;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+.wolf-badge {
+  display: inline-block;
+  margin-left: 5px;
+  background-color: #ffc107;
+  color: #212529;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.ctp-winner {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #28a745;
+}
+
+.ctp-winner h4 {
+  margin-top: 0;
+  color: #28a745;
+}
+
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  color: #6c757d;
+}
+
+.skins-calculator-container {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+/* Status badges in game history */
+.finalized-badge, .completed-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.finalized-badge {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.completed-badge {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #a3cfbb;
+}
+
+.game-finalized, .game-completed {
+  display: inline-block;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .history-container {
+    flex-direction: column;
+  }
+  
+  .games-sidebar {
+    flex: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding-right: 0;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
+import StatusBadge from './StatusBadge';
+import '../styles/ScoreCardAccessor.css';
 
 /**
  * ScoreCardAccessor Component
@@ -13,53 +15,62 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
   const [isScorekeeperUser, setIsScorekeeperUser] = useState(false);
   const [scorekeeperInfo, setScorekeeperInfo] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  const [accessCode, setAccessCode] = useState("1234"); // Default simple code
+  const [game, setGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if current user is the scorekeeper
-    const checkIfScorekeeper = async () => {
-      const currentUser = dataSync.getCurrentUser();
-      
-      if (currentUser && group.scorekeeperId === currentUser.id) {
-        setIsScorekeeperUser(true);
-      }
-      
-      // Get scorekeeper details
-      if (group.scorekeeperId) {
-        const allPlayers = await dataSync.getFriends();
-        const scorekeeper = allPlayers.find(p => p.id === group.scorekeeperId);
-        if (scorekeeper) {
-          setScorekeeperInfo(scorekeeper);
+    // Check if current user is the scorekeeper and load game data
+    const initialize = async () => {
+      try {
+        setLoading(true);
+        
+        // Load game data for status checking
+        const games = await dataSync.getGames();
+        const currentGame = games.find(g => g.id === gameId);
+        
+        if (!currentGame) {
+          setError("Game not found");
+          setLoading(false);
+          return;
         }
         
-        // Generate a simple accessCode - either use an existing one or create a new one
-        if (group.accessCode) {
-          setAccessCode(group.accessCode);
-        } else {
-          // Generate a simple 4-digit PIN
-          const newCode = Math.floor(1000 + Math.random() * 9000).toString();
-          setAccessCode(newCode);
-          
-          // Save the code to the group
-          const updatedGroup = { ...group, accessCode: newCode };
-          
-          // Get the game to update the group
-          const gamesData = await dataSync.getGames();
-          const game = gamesData.find(g => g.id === gameId);
-          
-          if (game && game.groups) {
-            const updatedGroups = [...game.groups];
-            updatedGroups[groupIndex] = updatedGroup;
-            
-            const updatedGame = { ...game, groups: updatedGroups };
-            await dataSync.updateGame(updatedGame);
-          }
+        setGame(currentGame);
+        
+        // Check if current user is the scorekeeper
+        const currentUser = dataSync.getCurrentUser();
+        console.log("Current user:", currentUser);
+        console.log("Group:", group);
+        
+        if (currentUser && group.scorekeeperId === currentUser.id) {
+          setIsScorekeeperUser(true);
         }
+        
+        // Get scorekeeper details
+        if (group.scorekeeperId) {
+          const allPlayers = await dataSync.getFriends();
+          console.log("All players:", allPlayers);
+          
+          const scorekeeper = allPlayers.find(p => p.id === group.scorekeeperId);
+          console.log("Scorekeeper:", scorekeeper);
+          
+          if (scorekeeper) {
+            setScorekeeperInfo(scorekeeper);
+          }
+        } else {
+          console.log("No scorekeeper assigned for this group");
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error in initialization:", error);
+        setError("Failed to load data");
+        setLoading(false);
       }
     };
     
-    checkIfScorekeeper();
+    initialize();
   }, [gameId, group, groupIndex]);
   
   // Generate a direct link to the scorecard page
@@ -101,15 +112,69 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
     navigate(`/scorecard/${gameId}/${groupIndex}`);
   };
   
+  // Check if score entry is allowed based on game status
+  const isScoreEntryAllowed = () => {
+    if (!game) return false;
+    
+    // Only allow score entry for in_progress, open, enrollment_complete, or completed (but not finalized) games
+    return ['in_progress', 'open', 'enrollment_complete', 'completed'].includes(game.status) && 
+           game.status !== 'finalized';
+  };
+  
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+  
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+  
   return (
     <div className="scorecard-accessor">
+      {/* Game Status Display */}
+      {game && (
+        <div className="game-status-section">
+          <h3>Game Status: <StatusBadge status={game.status || 'created'} /></h3>
+          
+          {game.status === 'finalized' && (
+            <div className="status-message finalized-message">
+              <p>This game has been finalized. Scores can no longer be modified.</p>
+              <p>View the results in the <span className="link-text" onClick={() => navigate('/game-history')}>Game History</span> page.</p>
+            </div>
+          )}
+          
+          {game.status === 'completed' && (
+            <div className="status-message completed-message">
+              <p>This game has been marked as completed. Final editing is still possible.</p>
+            </div>
+          )}
+          
+          {!['completed', 'finalized'].includes(game.status) && (
+            <div className="status-message">
+              <p>Scores can be entered and modified.</p>
+            </div>
+          )}
+        </div>
+      )}
+      
       {isScorekeeperUser ? (
-        <button 
-          className="btn btn-primary"
-          onClick={goToScorecard}
-        >
-          Enter Scores
-        </button>
+        <div className="scorekeeper-controls">
+          <button 
+            className={`btn btn-primary ${!isScoreEntryAllowed() ? 'disabled' : ''}`}
+            onClick={isScoreEntryAllowed() ? goToScorecard : undefined}
+            disabled={!isScoreEntryAllowed()}
+          >
+            {isScoreEntryAllowed() ? 'Enter Scores' : 'Score Entry Closed'}
+          </button>
+          
+          {!isScoreEntryAllowed() && (
+            <p className="disabled-message">
+              {game.status === 'finalized' 
+                ? 'This game has been finalized and scores cannot be modified.' 
+                : 'Score entry is not available for this game status.'}
+            </p>
+          )}
+        </div>
       ) : (
         <div className="scorekeeper-info">
           <div>Scorekeeper: <strong>{scorekeeperInfo?.name || 'Not assigned'}</strong></div>
@@ -120,13 +185,19 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
               <div className="scorecard-link-display">
                 <code>{getScorecardLink()}</code>
               </div>
-              <div className="login-code-info">
-                <div className="simple-access-code">
-                  <h4>Scorekeeper Login Code</h4>
-                  <div className="code-display">{accessCode}</div>
+              
+              {!isScoreEntryAllowed() && (
+                <div className="warning-box">
+                  <p>
+                    <strong>Note:</strong> This game is {game.status === 'finalized' ? 'finalized' : `in "${game.status}" status`} and 
+                    score entry is {game.status === 'finalized' ? 'permanently closed' : 'currently not available'}.
+                  </p>
                 </div>
+              )}
+              
+              <div className="scorekeeper-info-box">
                 <p>
-                  <strong>Note:</strong> The scorekeeper will need this simple 4-digit code to access and enter scores.
+                  <strong>Note:</strong> The scorekeeper will need to log in with their player account to access this scorecard.
                 </p>
               </div>
               <div className="scorecard-actions">
@@ -135,18 +206,6 @@ const ScoreCardAccessor = ({ gameId, groupIndex, group }) => {
                   onClick={copyLinkToClipboard}
                 >
                   {linkCopied ? 'Link Copied! ✓' : 'Copy Link'}
-                </button>
-                <button 
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    const newCode = Math.floor(1000 + Math.random() * 9000).toString();
-                    setAccessCode(newCode);
-                    
-                    // Update the group with the new code (in a real app)
-                    // This is simplified for demonstration
-                  }}
-                >
-                  Generate New Code
                 </button>
               </div>
             </div>
