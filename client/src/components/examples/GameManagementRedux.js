@@ -6,7 +6,7 @@
  * migrating other components.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchGames, 
@@ -42,6 +42,12 @@ const GameManagementRedux = () => {
   const completedGames = useSelector(selectCompletedGames);
   const finalizedGames = useSelector(selectFinalizedGames);
   
+  // Pre-select all the game status types (fixing the hooks rule violation)
+  const gamesByOpenStatus = useSelector(state => selectGamesByStatus(state, GAME_STATUSES.OPEN));
+  const gamesByInProgressStatus = useSelector(state => selectGamesByStatus(state, GAME_STATUSES.IN_PROGRESS));
+  const gamesByCompletedStatus = useSelector(state => selectGamesByStatus(state, GAME_STATUSES.COMPLETED));
+  const gamesByFinalizedStatus = useSelector(state => selectGamesByStatus(state, GAME_STATUSES.FINALIZED));
+  
   // Local state
   const [filter, setFilter] = useState('all');
   
@@ -50,22 +56,22 @@ const GameManagementRedux = () => {
     dispatch(fetchGames());
   }, [dispatch]);
   
-  // Get filtered games
-  const getFilteredGames = () => {
+  // Compute filtered games using useMemo to avoid repeated calculations
+  const filteredGames = useMemo(() => {
     switch (filter) {
       case 'open':
-        return useSelector(state => selectGamesByStatus(state, GAME_STATUSES.OPEN));
+        return gamesByOpenStatus;
       case 'in_progress':
-        return useSelector(state => selectGamesByStatus(state, GAME_STATUSES.IN_PROGRESS));
+        return gamesByInProgressStatus;
       case 'completed':
-        return useSelector(state => selectGamesByStatus(state, GAME_STATUSES.COMPLETED));
+        return gamesByCompletedStatus;
       case 'finalized':
-        return useSelector(state => selectGamesByStatus(state, GAME_STATUSES.FINALIZED));
+        return gamesByFinalizedStatus;
       case 'all':
       default:
         return games;
     }
-  };
+  }, [filter, games, gamesByOpenStatus, gamesByInProgressStatus, gamesByCompletedStatus, gamesByFinalizedStatus]);
   
   // Handle status change
   const handleStatusChange = async (gameId, newStatus) => {
@@ -137,7 +143,7 @@ const GameManagementRedux = () => {
               </tr>
             </thead>
             <tbody>
-              {getFilteredGames().map(game => (
+              {filteredGames.map(game => (
                 <tr key={game.id}>
                   <td>{new Date(game.date).toLocaleDateString()}</td>
                   <td>{game.course}</td>
