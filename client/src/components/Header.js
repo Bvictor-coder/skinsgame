@@ -50,6 +50,16 @@ const Header = () => {
       <div className="header-content">
         <div className="logo">
           <h1>The Skins Game</h1>
+          {/* Add direct link to MongoDB test page */}
+          <a href="/test-db-sync" style={{
+            fontSize: '0.8rem',
+            marginLeft: '10px',
+            textDecoration: 'none',
+            color: '#4CAF50', 
+            fontWeight: 'bold'
+          }}>
+            MongoDB Demo
+          </a>
         </div>
         
         <div className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -82,6 +92,7 @@ const Header = () => {
               <a href="#friends" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Manage Players</a>
               <a href="#games" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Manage Games</a>
               <a href="#grouping" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Create Groups</a>
+              <a href="/test-db-sync" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>MongoDB Demo</a>
             </div>
           )}
           

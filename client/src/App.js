@@ -26,16 +26,10 @@ import './styles/GameManagementStyles.css'; // Import game management styles
 // Import the simplified component for debugging
 import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
 
-// Import test components when in development
-const GameManagementRedux = process.env.NODE_ENV !== 'production' 
-  ? React.lazy(() => import('./components/examples/GameManagementRedux'))
-  : null;
-const GameStateMachineTest = process.env.NODE_ENV !== 'production'
-  ? React.lazy(() => import('./components/examples/GameStateMachineTest'))
-  : null;
-const DatabaseSyncExample = process.env.NODE_ENV !== 'production'
-  ? React.lazy(() => import('./components/examples/DatabaseSyncExample'))
-  : null;
+// Import test components regardless of environment
+const GameManagementRedux = React.lazy(() => import('./components/examples/GameManagementRedux'));
+const GameStateMachineTest = React.lazy(() => import('./components/examples/GameStateMachineTest'));
+const DatabaseSyncExample = React.lazy(() => import('./components/examples/DatabaseSyncExample'));
 
 // Set this to true to use the simplified version for debugging
 const USE_SIMPLIFIED_GROUPS = false;
