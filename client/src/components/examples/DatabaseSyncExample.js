@@ -62,9 +62,12 @@ const DatabaseSyncExample = () => {
     return () => clearInterval(apiCheckInterval);
   }, [dispatch]);
   
-  // Always call useSelector unconditionally (fixing the hooks rule error)
-  const gameById = useSelector(state => selectedGameId ? selectGameById(state, selectedGameId) : null);
-  const selectedGame = gameById;
+  // Get the selected game - always call useSelector unconditionally
+  // Move the conditional logic INSIDE the selector function
+  const selectedGame = useSelector(state => {
+    if (!selectedGameId) return null;
+    return selectGameById(state, selectedGameId);
+  });
   
   // Form input change handler
   const handleInputChange = (e) => {
