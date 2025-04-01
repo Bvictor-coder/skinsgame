@@ -13,7 +13,8 @@ const DebugPanel = () => {
   const [games, setGames] = useState([]);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
-  const [currentStorage, setCurrentStorage] = useState({});
+  // State for storing localStorage contents (commented out to avoid eslint warning)
+  const [/*currentStorage*/, setCurrentStorage] = useState({});
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   // Load all games on component mount
@@ -26,7 +27,7 @@ const DebugPanel = () => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [loadGames, handleStorageChange]);
   
   // Setup auto-refresh interval if enabled
   useEffect(() => {
@@ -42,7 +43,7 @@ const DebugPanel = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh]);
+  }, [autoRefresh, loadGames]);
   
   // Update selected game when games change or selected ID changes
   useEffect(() => {

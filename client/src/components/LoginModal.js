@@ -18,7 +18,8 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
   // New state for scorekeeper selection
   const [activeGames, setActiveGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(gameId || '');
-  const [gameGroups, setGameGroups] = useState([]);
+  // Store groups for the selected game (commented to avoid eslint warning)
+  const [/*gameGroups*/, setGameGroups] = useState([]);
   
   // Load players for regular player selection (not scorekeeper)
   useEffect(() => {

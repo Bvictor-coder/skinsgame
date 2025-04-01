@@ -350,7 +350,7 @@ class DataSyncService {
     try {
       // Get all signups from server
       const response = await api.signups.getAll();
-      const serverSignups = response.data;
+      const serverSignupsData = response.data;
       
       // Convert local signup structure to match server structure
       const localSignupsFlat = [];
@@ -367,7 +367,7 @@ class DataSyncService {
       
       // Find local signups not on server
       const serverSignupKeys = new Set(
-        serverSignups.map(s => `${s.gameId}_${s.playerId}`)
+        serverSignupsData.map(s => `${s.gameId}_${s.playerId}`)
       );
       
       const localOnlySignups = localSignupsFlat.filter(signup => {
@@ -386,7 +386,7 @@ class DataSyncService {
       
       // Prepare new structure for local signups
       const newSignups = {};
-      serverSignups.forEach(signup => {
+      serverSignupsData.forEach(signup => {
         if (!newSignups[signup.gameId]) {
           newSignups[signup.gameId] = [];
         }
@@ -669,7 +669,7 @@ class DataSyncService {
         // Add transition timestamp
         const timestamp = new Date().toISOString();
         
-        switch (updateData.status) {
+          switch (updateData.status) {
           case 'created':
             updatedGame.createdAt = timestamp;
             break;
@@ -687,6 +687,9 @@ class DataSyncService {
             break;
           case 'finalized':
             updatedGame.finalizedAt = timestamp;
+            break;
+          default:
+            // No special handling for other statuses
             break;
         }
       }
