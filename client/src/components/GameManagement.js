@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
-import StatusBadge from './StatusBadge';
+import EnhancedStatusBadge from './EnhancedStatusBadge';
+import GameStatusTimeline from './GameStatusTimeline';
 import CtpPlayerSelector from './CtpPlayerSelector';
+import gameLifecycleManager from '../utils/GameLifecycleManager';
+import '../styles/GameManagementStyles.css';
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
@@ -35,7 +38,7 @@ const GameManagement = () => {
     loadGames();
   }, []);
 
-  // Function to update a game's status
+  // Function to update a game's status using the lifecycle manager
   const updateGameStatus = async (gameId, newStatus) => {
     try {
       const gameData = games.find(g => g.id === gameId);
@@ -44,39 +47,25 @@ const GameManagement = () => {
         return false;
       }
       
-      console.log(`Updating game ${gameId} status to ${newStatus}`);
+      console.log(`Transitioning game ${gameId} to status ${newStatus}`);
       
-      const updatedGame = {
-        ...gameData,
-        status: newStatus,
-        statusUpdatedAt: new Date().toISOString()
-      };
+      let updatedGame;
       
-      // Ensure the scores object exists
-      if (!updatedGame.scores) {
-        updatedGame.scores = { raw: [] };
-      }
-      
-      // Special handling for finalized status to ensure calculated results are preserved
+      // Use the lifecycle manager to handle transition properly
       if (newStatus === 'finalized') {
-        // Check if there are calculated results from the scorecard
-        const currentGame = await dataSync.getGames().then(
-          games => games.find(g => g.id === gameId)
-        );
-        
-        if (currentGame && currentGame.scores && currentGame.scores.calculated) {
-          console.log('Preserving calculated scores during finalization');
-          // Ensure calculated results are preserved
-          updatedGame.scores = {
-            ...updatedGame.scores,
-            calculated: currentGame.scores.calculated
-          };
-        } else {
-          console.warn('No calculated scores found when finalizing game');
-        }
+        // Handle special case for finalization
+        updatedGame = gameLifecycleManager.finalizeGame(gameData);
+      } else {
+        // Regular status transition
+        updatedGame = gameLifecycleManager.transitionGame(gameData, newStatus, {
+          metadata: {
+            updatedBy: 'admin',
+            updatedAt: new Date().toISOString()
+          }
+        });
       }
       
-      // Perform the update with the complete game object
+      // Perform the update with the transitioned game object
       const result = await dataSync.updateGame(updatedGame);
       
       if (!result) {
@@ -321,7 +310,10 @@ const GameManagement = () => {
                 <div className="game-column col-date">{formatDate(game.date)}</div>
                 <div className="game-column col-course">{game.courseName}</div>
                 <div className="game-column col-status">
-                  <StatusBadge status={game.status || 'created'} />
+                  <EnhancedStatusBadge 
+                    status={game.status || 'created'} 
+                    size="small"
+                  />
                 </div>
                 <div className="game-column col-players">
                   {game.groups ? game.groups.reduce((total, group) => 
@@ -400,47 +392,8 @@ const GameManagement = () => {
                     </div>
                   )}
                   
-                  <div className="game-history">
-                    <h4>Status History</h4>
-                    <div className="status-timeline">
-                      {game.createdAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Created</span>
-                          <span className="timeline-date">{new Date(game.createdAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                      {game.openedAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Opened for Enrollment</span>
-                          <span className="timeline-date">{new Date(game.openedAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                      {game.enrollmentCompletedAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Enrollment Completed</span>
-                          <span className="timeline-date">{new Date(game.enrollmentCompletedAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                      {game.startedAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Started</span>
-                          <span className="timeline-date">{new Date(game.startedAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                      {game.completedAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Completed</span>
-                          <span className="timeline-date">{new Date(game.completedAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                      {game.finalizedAt && (
-                        <div className="timeline-item">
-                          <span className="timeline-status">Finalized</span>
-                          <span className="timeline-date">{new Date(game.finalizedAt).toLocaleString()}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* Enhanced Status Timeline */}
+                  <GameStatusTimeline game={game} />
                 </div>
               )}
             </div>

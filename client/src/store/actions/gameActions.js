@@ -8,6 +8,7 @@ import * as types from './types';
 import Game from '../../models/Game';
 import storageManager from '../../storage/StorageManager';
 import { GAME_STATUSES } from '../../models/GameStatus';
+import gameLifecycleManager from '../../utils/GameLifecycleManager';
 
 /**
  * Fetch all games
@@ -148,9 +149,10 @@ export const updateGame = (id, updates) => async (dispatch) => {
  * Transition a game to a new status
  * @param {string} id - Game ID
  * @param {string} newStatus - New game status
+ * @param {Object} options - Additional options for the transition
  * @returns {Function} Thunk action
  */
-export const transitionGameStatus = (id, newStatus) => async (dispatch) => {
+export const transitionGameStatus = (id, newStatus, options = {}) => async (dispatch) => {
   dispatch({ type: types.TRANSITION_GAME_STATUS_REQUEST });
   
   try {
@@ -161,23 +163,26 @@ export const transitionGameStatus = (id, newStatus) => async (dispatch) => {
       throw new Error(`Game with ID ${id} not found`);
     }
     
+    // Use lifecycle manager to transition the game
+    let updatedGame;
+    
     // Handle special case for finalization
     if (newStatus === GAME_STATUSES.FINALIZED) {
-      game.finalize();
+      updatedGame = gameLifecycleManager.finalizeGame(game);
     } else {
       // Normal status transition
-      game.transitionTo(newStatus);
+      updatedGame = gameLifecycleManager.transitionGame(game, newStatus, options);
     }
     
     // Save to storage
-    await storageManager.save(game);
+    await storageManager.save(updatedGame);
     
     dispatch({
       type: types.TRANSITION_GAME_STATUS_SUCCESS,
-      payload: game
+      payload: updatedGame
     });
     
-    return game;
+    return updatedGame;
   } catch (error) {
     console.error(`Error transitioning game ${id} to ${newStatus}:`, error);
     
@@ -208,7 +213,7 @@ export const updateGameScores = (id, scores) => async (dispatch) => {
     }
     
     // Ensure game is in a state where scores can be modified
-    if (!game.canModifyScores()) {
+    if (!gameLifecycleManager.canEnterScores(game)) {
       throw new Error(`Cannot modify scores for game in ${game.status} status`);
     }
     
@@ -280,9 +285,10 @@ export const setCalculatedScores = (id, calculatedScores) => async (dispatch) =>
 /**
  * Finalize a game
  * @param {string} id - Game ID
+ * @param {Object} options - Additional options for finalization
  * @returns {Function} Thunk action
  */
-export const finalizeGame = (id) => async (dispatch) => {
+export const finalizeGame = (id, options = {}) => async (dispatch) => {
   dispatch({ type: types.FINALIZE_GAME_REQUEST });
   
   try {
@@ -293,18 +299,18 @@ export const finalizeGame = (id) => async (dispatch) => {
       throw new Error(`Game with ID ${id} not found`);
     }
     
-    // Finalize game
-    game.finalize();
+    // Use lifecycle manager to finalize the game
+    const updatedGame = gameLifecycleManager.finalizeGame(game);
     
     // Save to storage
-    await storageManager.save(game);
+    await storageManager.save(updatedGame);
     
     dispatch({
       type: types.FINALIZE_GAME_SUCCESS,
-      payload: game
+      payload: updatedGame
     });
     
-    return game;
+    return updatedGame;
   } catch (error) {
     console.error(`Error finalizing game ${id}:`, error);
     

@@ -30,6 +30,7 @@ import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
 const GameManagementRedux = React.lazy(() => import('./components/examples/GameManagementRedux'));
 const GameStateMachineTest = React.lazy(() => import('./components/examples/GameStateMachineTest'));
 const DatabaseSyncExample = React.lazy(() => import('./components/examples/DatabaseSyncExample'));
+const GameLifecycleTest = React.lazy(() => import('./examples/GameLifecycleTest'));
 
 // Set this to true to use the simplified version for debugging
 const USE_SIMPLIFIED_GROUPS = false;
@@ -348,6 +349,14 @@ const AppRoutes = () => {
           element={
             <React.Suspense fallback={<div>Loading...</div>}>
               {DatabaseSyncExample ? <DatabaseSyncExample /> : <div>Component not available in production</div>}
+            </React.Suspense>
+          }
+        />
+        <Route 
+          path="/test-lifecycle" 
+          element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {GameLifecycleTest ? <GameLifecycleTest /> : <div>Component not available in production</div>}
             </React.Suspense>
           }
         />

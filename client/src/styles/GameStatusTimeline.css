@@ -1,0 +1,208 @@
+/* Game Status Timeline Styles */
+
+.game-status-timeline {
+  margin: 20px 0;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.timeline-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Main timeline container */
+.timeline-container {
+  position: relative;
+  height: 120px;
+  margin: 30px 0;
+  padding: 0 15px;
+}
+
+/* The horizontal timeline line */
+.timeline-track {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: #e0e0e0;
+  z-index: 1;
+}
+
+/* Progress indicator */
+.timeline-progress {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  height: 4px;
+  background-color: #4caf50;
+  transition: width 0.5s ease-in-out;
+  z-index: 2;
+}
+
+/* Individual status points */
+.timeline-point {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 3;
+}
+
+/* Status marker (dot) */
+.timeline-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  border: 2px solid #fff;
+  margin-top: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Status label */
+.timeline-label {
+  text-align: center;
+  padding-top: 8px;
+  max-width: 100px;
+  font-size: 0.85rem;
+}
+
+.status-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.status-time {
+  font-size: 0.75rem;
+  color: #777;
+}
+
+.elapsed-time {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* Status node states */
+.timeline-point.reached .timeline-marker {
+  background-color: #4caf50;
+  border-color: #e8f5e9;
+}
+
+.timeline-point.current .timeline-marker {
+  background-color: #2196f3;
+  border-color: #e3f2fd;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.2);
+}
+
+.timeline-point.current .status-name {
+  color: #2196f3;
+  font-weight: 700;
+}
+
+/* Not reached status has muted appearance */
+.timeline-point:not(.reached) .status-name {
+  color: #aaa;
+}
+
+/* Detailed history section */
+.timeline-history {
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+
+.history-title {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #555;
+}
+
+.history-entries {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.history-entry {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #eee;
+}
+
+.history-entry:last-child {
+  border-bottom: none;
+}
+
+.history-time {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.history-change {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.previous-status {
+  color: #777;
+}
+
+.change-arrow {
+  color: #9e9e9e;
+  font-size: 0.8rem;
+}
+
+.new-status {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .timeline-container {
+    height: 150px;
+    margin: 40px 0;
+  }
+  
+  .timeline-point {
+    width: 100px;
+  }
+  
+  .timeline-point:nth-child(odd) .timeline-label {
+    top: -40px;
+  }
+  
+  .timeline-point:nth-child(even) .timeline-label {
+    top: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-label {
+    font-size: 0.7rem;
+  }
+  
+  .timeline-container {
+    height: 180px;
+  }
+}
