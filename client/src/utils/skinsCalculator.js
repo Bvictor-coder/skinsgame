@@ -475,7 +475,7 @@ export const getScoreDistribution = (skillLevel, par) => {
   // Base probabilities for a mid-level player (adjusted by par)
   let eagleOrBetter = 0.01;
   let birdie = 0.10;
-  let par = 0.30;
+  let parProbability = 0.30;
   let bogey = 0.40;
   let doubleBogey = 0.15;
   let triplePlus = 0.04;
@@ -484,28 +484,28 @@ export const getScoreDistribution = (skillLevel, par) => {
   if (skillLevel > 0.7) { // Very good player
     eagleOrBetter = 0.03;
     birdie = 0.20;
-    par = 0.50;
+    parProbability = 0.50;
     bogey = 0.20;
     doubleBogey = 0.05;
     triplePlus = 0.02;
   } else if (skillLevel > 0.4) { // Good player
     eagleOrBetter = 0.01;
     birdie = 0.15;
-    par = 0.40;
+    parProbability = 0.40;
     bogey = 0.30;
     doubleBogey = 0.10;
     triplePlus = 0.04;
   } else if (skillLevel > 0.2) { // Average player
     eagleOrBetter = 0.005;
     birdie = 0.08;
-    par = 0.30;
+    parProbability = 0.30;
     bogey = 0.40;
     doubleBogey = 0.15;
     triplePlus = 0.065;
   } else { // Beginner
     eagleOrBetter = 0.001;
     birdie = 0.04;
-    par = 0.20;
+    parProbability = 0.20;
     bogey = 0.35;
     doubleBogey = 0.25;
     triplePlus = 0.159;
@@ -526,7 +526,7 @@ export const getScoreDistribution = (skillLevel, par) => {
   return {
     eagleOrBetter,
     birdie,
-    par,
+    par: parProbability, // Return parProbability as "par" in the distribution object
     bogey,
     doubleBogey,
     triplePlus
