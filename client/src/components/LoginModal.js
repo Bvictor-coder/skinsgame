@@ -10,7 +10,7 @@ import dataSync from '../utils/dataSync';
 const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
   const [role, setRole] = useState('');
   const [playerId, setPlayerId] = useState('');
-  const [accessCode, setAccessCode] = useState('');
+  // accessCode state removed as it's no longer needed with the new scorekeeper login approach
   const [error, setError] = useState('');
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);

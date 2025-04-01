@@ -237,18 +237,7 @@ const GameManagement = () => {
     }
   };
 
-  // Function to get formatted status text
-  const getStatusText = (status) => {
-    switch(status) {
-      case 'created': return 'Created';
-      case 'open': return 'Open for Enrollment';
-      case 'enrollment_complete': return 'Enrollment Complete';
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      case 'finalized': return 'Finalized';
-      default: return 'Unknown';
-    }
-  };
+  // Function removed as it was unused - StatusBadge component now handles this
 
   // Function to format date string
   const formatDate = (dateString) => {
