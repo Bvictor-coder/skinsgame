@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dataSync from '../utils/dataSync';
+import StatusBadge from './StatusBadge';
+import CtpPlayerSelector from './CtpPlayerSelector';
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
@@ -75,8 +77,8 @@ const GameManagement = () => {
 
   // Function to check if a status transition is valid
   const isValidTransition = (currentStatus, newStatus) => {
-    // Define valid status transitions
-    const validTransitions = {
+    // Define forward (progression) status transitions
+    const forwardTransitions = {
       'created': ['open'],
       'open': ['enrollment_complete'],
       'enrollment_complete': ['in_progress'],
@@ -84,62 +86,154 @@ const GameManagement = () => {
       'completed': ['finalized']
     };
     
+    // Define backward (reversion) status transitions for corrections
+    const backwardTransitions = {
+      'open': ['created'],
+      'enrollment_complete': ['open'],
+      'in_progress': ['enrollment_complete'],
+      'completed': ['in_progress'],
+      'finalized': ['completed']
+    };
+    
     // If current status is undefined/null, only allow transition to 'created'
     if (!currentStatus) {
       return newStatus === 'created';
     }
     
-    // Check if the transition is valid
-    return validTransitions[currentStatus]?.includes(newStatus);
+    // Check if the transition is valid in either direction
+    return (forwardTransitions[currentStatus]?.includes(newStatus) || 
+            backwardTransitions[currentStatus]?.includes(newStatus));
   };
 
   // Function to get available actions based on current status
   const getAvailableActions = (game) => {
-    const actions = [];
+    const forwardActions = [];
+    const backwardActions = [];
     const currentStatus = game.status || 'created';
     
+    // Forward progression actions
     if (isValidTransition(currentStatus, 'open')) {
-      actions.push({ label: 'Open for Enrollment', status: 'open' });
+      forwardActions.push({ 
+        label: 'Open for Enrollment', 
+        status: 'open',
+        direction: 'forward'
+      });
     }
     
     if (isValidTransition(currentStatus, 'enrollment_complete')) {
-      actions.push({ label: 'Complete Enrollment', status: 'enrollment_complete' });
+      forwardActions.push({ 
+        label: 'Complete Enrollment', 
+        status: 'enrollment_complete',
+        direction: 'forward'
+      });
     }
     
     if (isValidTransition(currentStatus, 'in_progress')) {
-      actions.push({ label: 'Start Game', status: 'in_progress' });
+      forwardActions.push({ 
+        label: 'Start Game', 
+        status: 'in_progress',
+        direction: 'forward'
+      });
     }
     
     if (isValidTransition(currentStatus, 'completed')) {
-      actions.push({ label: 'Mark Completed', status: 'completed' });
+      forwardActions.push({ 
+        label: 'Mark Completed', 
+        status: 'completed',
+        direction: 'forward'
+      });
     }
     
     if (isValidTransition(currentStatus, 'finalized')) {
       // Only allow finalization if CTP is set
       if (game.ctpPlayerId) {
-        actions.push({ label: 'Finalize Game', status: 'finalized' });
+        forwardActions.push({ 
+          label: 'Finalize Game', 
+          status: 'finalized',
+          direction: 'forward'
+        });
       } else {
-        actions.push({ 
+        forwardActions.push({ 
           label: 'Finalize Game (Set CTP First)', 
           status: 'finalized',
           disabled: true,
-          tooltip: 'You must set a Closest To Pin player before finalizing'
+          tooltip: 'You must set a Closest To Pin player before finalizing',
+          direction: 'forward'
         });
       }
     }
     
-    return actions;
+    // Backward reversion actions for corrections
+    if (isValidTransition(currentStatus, 'created')) {
+      backwardActions.push({ 
+        label: 'Revert to Created', 
+        status: 'created',
+        direction: 'backward'
+      });
+    }
+    
+    if (isValidTransition(currentStatus, 'open')) {
+      backwardActions.push({ 
+        label: 'Revert to Open Enrollment', 
+        status: 'open',
+        direction: 'backward'
+      });
+    }
+    
+    if (isValidTransition(currentStatus, 'enrollment_complete')) {
+      backwardActions.push({ 
+        label: 'Revert to Enrollment Complete', 
+        status: 'enrollment_complete',
+        direction: 'backward'
+      });
+    }
+    
+    if (isValidTransition(currentStatus, 'in_progress')) {
+      backwardActions.push({ 
+        label: 'Revert to In Progress', 
+        status: 'in_progress',
+        direction: 'backward'
+      });
+    }
+    
+    if (isValidTransition(currentStatus, 'completed')) {
+      backwardActions.push({ 
+        label: 'Revert to Completed (Unfinalize)', 
+        status: 'completed',
+        direction: 'backward'
+      });
+    }
+    
+    // Combine forward and backward actions
+    // Forward actions first, then backward actions
+    return [...forwardActions, ...backwardActions];
   };
 
-  // Function to set CTP (Closest to Pin) player for a game
-  const openCtpSelection = (gameId) => {
-    // For now just navigate to the scorecard page for any group
-    // (In a real implementation, you'd have a dedicated CTP selection modal)
-    const game = games.find(g => g.id === gameId);
-    if (game && game.groups && game.groups.length > 0) {
-      navigate(`/scorecard/${gameId}/0`);
-    } else {
-      setError('Game has no groups. Add groups first.');
+  // Function to update CTP player for a game
+  const updateCtpPlayer = async (gameId, playerId) => {
+    try {
+      const gameData = games.find(g => g.id === gameId);
+      if (!gameData) return;
+      
+      const updatedGame = {
+        ...gameData,
+        ctpPlayerId: playerId,
+        ctpUpdatedAt: new Date().toISOString()
+      };
+      
+      await dataSync.updateGame(updatedGame);
+      
+      // Update local state
+      setGames(prev => 
+        prev.map(g => g.id === gameId ? updatedGame : g)
+      );
+      
+      setError(null);
+      return true;
+    } catch (err) {
+      console.error('Error updating CTP player:', err);
+      setError('Failed to update CTP player. Please try again.');
+      return false;
     }
   };
 
@@ -215,9 +309,7 @@ const GameManagement = () => {
                 <div className="game-column col-date">{formatDate(game.date)}</div>
                 <div className="game-column col-course">{game.courseName}</div>
                 <div className="game-column col-status">
-                  <span className={`status-badge status-${game.status || 'created'}`}>
-                    {getStatusText(game.status || 'created')}
-                  </span>
+                  <StatusBadge status={game.status || 'created'} />
                 </div>
                 <div className="game-column col-players">
                   {game.groups ? game.groups.reduce((total, group) => 
@@ -268,7 +360,7 @@ const GameManagement = () => {
                         <button
                           key={index}
                           onClick={() => handleGameAction(game.id, action.status)}
-                          className={`action-btn action-${action.status}`}
+                          className={`action-btn action-${action.status} ${action.direction}`}
                           disabled={action.disabled}
                           title={action.tooltip}
                         >
@@ -282,16 +374,19 @@ const GameManagement = () => {
                       >
                         Manage Players & Groups
                       </button>
-                      
-                      <button 
-                        className="action-btn action-set-ctp"
-                        onClick={() => openCtpSelection(game.id)}
-                        disabled={!game.ctpHole}
-                      >
-                        {game.ctpPlayerId ? 'Update CTP Winner' : 'Set CTP Winner'}
-                      </button>
                     </div>
                   </div>
+                  
+                  {/* CTP Player Selector */}
+                  {game.ctpHole && (
+                    <div className="ctp-selection-section">
+                      <CtpPlayerSelector 
+                        game={game} 
+                        onSelectCtp={(playerId) => updateCtpPlayer(game.id, playerId)}
+                        disabled={game.status === 'finalized'}
+                      />
+                    </div>
+                  )}
                   
                   <div className="game-history">
                     <h4>Status History</h4>

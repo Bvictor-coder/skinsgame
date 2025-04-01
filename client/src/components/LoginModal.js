@@ -19,11 +19,42 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
   // Load players for the dropdown when the modal opens
   useEffect(() => {
     const loadPlayers = async () => {
-      if (isOpen && role === 'player') {
+      if (isOpen && (role === 'player' || role === 'scorekeeper')) {
         setLoading(true);
         try {
+          // Get all players
           const allPlayers = await dataSync.getFriends();
-          setPlayers(allPlayers || []);
+          
+          // If we're in scorekeeper mode and have a gameId/groupIndex,
+          // we need to filter to show only the designated scorekeeper
+          if (role === 'scorekeeper' && gameId && groupIndex !== undefined) {
+            const gamesData = await dataSync.getGames();
+            const game = gamesData.find(g => g.id === gameId);
+            
+            if (game && game.groups && game.groups[groupIndex]) {
+              const group = game.groups[groupIndex];
+              
+              // If this group has a designated scorekeeper, filter the players list
+              if (group.scorekeeperId) {
+                const scorekeeperPlayer = allPlayers.find(p => p.id === group.scorekeeperId);
+                if (scorekeeperPlayer) {
+                  setPlayers([scorekeeperPlayer]);
+                } else {
+                  // If we can't find the scorekeeper in the players list, show all
+                  setPlayers(allPlayers || []);
+                }
+              } else {
+                // No designated scorekeeper, show all players
+                setPlayers(allPlayers || []);
+              }
+            } else {
+              // Game or group not found, show all players
+              setPlayers(allPlayers || []);
+            }
+          } else {
+            // For player role, just show all players
+            setPlayers(allPlayers || []);
+          }
         } catch (err) {
           console.error('Error loading players:', err);
           setError('Unable to load players. Please try again.');
@@ -34,7 +65,7 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
     };
     
     loadPlayers();
-  }, [isOpen, role]);
+  }, [isOpen, role, gameId, groupIndex]);
   
   // Load game data for scorekeeper code validation
   useEffect(() => {
@@ -83,9 +114,14 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
         setError('Please select a player');
       }
     } else if (role === 'scorekeeper') {
-      // For scorekeeper, validate the simple access code
+      // For scorekeeper, ensure a scorekeeper is selected
+      if (!playerId) {
+        setError('Please select a scorekeeper');
+        return;
+      }
+      
       try {
-        // Get the group data to verify the access code
+        // Get the game data to verify the scorekeeper is valid for this group
         const gamesData = await dataSync.getGames();
         const game = gamesData.find(g => g.id === gameId);
         
@@ -101,15 +137,12 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
           return;
         }
         
-        // Allow the default 4-digit code or the specific accessCode from the group
-        const validCode = group.accessCode || '1234';
-        
-        // Also allow a master code for testing
-        if (accessCode === validCode || accessCode === '0000') {
-          loginAsScorekeeper(gameId, groupIndex, accessCode);
+        // Check if this player is the designated scorekeeper for this group
+        if (playerId === group.scorekeeperId) {
+          loginAsScorekeeper(gameId, groupIndex, playerId);
           onClose();
         } else {
-          setError('Invalid scorekeeper code. Please check and try again.');
+          setError('You are not the designated scorekeeper for this group.');
         }
       } catch (err) {
         console.error('Error validating scorekeeper access:', err);
@@ -205,23 +238,44 @@ const LoginModal = ({ isOpen, onClose, gameId, groupIndex }) => {
             </div>
           )}
           
-          {/* Only show access code field for scorekeeper, not for admin */}
+          {/* Show scorekeeper selection dropdown */}
           {role === 'scorekeeper' && (
             <div className="form-group">
-              <label>Scorekeeper Access Code:</label>
-              <input 
-                type="text"
-                className="access-code-input"
-                value={accessCode} 
-                onChange={(e) => setAccessCode(e.target.value)}
-                placeholder="Enter 4-digit code"
-                maxLength={4}
-                pattern="[0-9]*"
-              />
+              <label>Select Game:</label>
+              <select 
+                value={gameId || ''}
+                onChange={(e) => {
+                  // This would normally update gameId, but we're using the one from props
+                  console.log('Would select game:', e.target.value);
+                }}
+                disabled={gameId ? true : false}
+              >
+                {gameId ? (
+                  <option value={gameId}>Current Game</option>
+                ) : (
+                  <option value="">-- Select Game --</option>
+                )}
+              </select>
               
-              <div className="access-code-help">
-                <p>Enter the 4-digit access code provided by the administrator.</p>
-                <p className="fallback-hint">Tip: Try code <strong>0000</strong> if you don't have the access code.</p>
+              <label>Select Scorekeeper:</label>
+              {loading ? (
+                <div className="loading-indicator">Loading scorekeepers...</div>
+              ) : (
+                <select 
+                  value={playerId} 
+                  onChange={(e) => setPlayerId(e.target.value)}
+                >
+                  <option value="">-- Select Your Name --</option>
+                  {players.map(player => (
+                    <option key={player.id} value={player.id}>
+                      {player.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              
+              <div className="scorekeeper-info">
+                <p>You must be the designated scorekeeper for this group.</p>
               </div>
             </div>
           )}

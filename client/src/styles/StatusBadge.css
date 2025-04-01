@@ -1,0 +1,60 @@
+/* Status Badge Styles */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Created status */
+.status-created {
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+/* Open for enrollment status */
+.status-open {
+  background-color: #cff4fc;
+  color: #055160;
+  border: 1px solid #9eeaf9;
+}
+
+/* Enrollment complete status */
+.status-enrollment_complete {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #a3cfbb;
+}
+
+/* In progress status */
+.status-in_progress {
+  background-color: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffecb5;
+}
+
+/* Completed status */
+.status-completed {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+/* Finalized status */
+.status-finalized {
+  background-color: #c3e6cb;
+  color: #155724;
+  border: 1px solid #b1dfbb;
+}
+
+/* Unknown status */
+.status-unknown {
+  background-color: #e2e3e5;
+  color: #41464b;
+  border: 1px solid #d3d6d8;
+}

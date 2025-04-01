@@ -1,0 +1,92 @@
+/* CTP Player Selector Styles */
+
+.ctp-player-selector {
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.ctp-player-selector h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #495057;
+}
+
+.ctp-selection-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ctp-player-selector select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9em;
+  background-color: #fff;
+}
+
+.ctp-player-selector select.disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.ctp-clear-btn {
+  padding: 8px 12px;
+  background-color: #f8d7da;
+  color: #842029;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.ctp-clear-btn:hover:not(:disabled) {
+  background-color: #f5c2c7;
+}
+
+.ctp-clear-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ctp-winner-display {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #d1e7dd;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ctp-label {
+  font-weight: bold;
+  color: #0f5132;
+}
+
+.ctp-winner {
+  color: #0f5132;
+  font-weight: bold;
+}
+
+.ctp-reminder {
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #fff3cd;
+  border-radius: 4px;
+  color: #664d03;
+}
+
+.ctp-reminder p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.loading-indicator {
+  padding: 10px;
+  color: #6c757d;
+  font-style: italic;
+}

@@ -184,11 +184,22 @@
   font-size: 0.9em;
   cursor: pointer;
   transition: background-color 0.2s;
+  position: relative;
 }
 
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Forward progression action buttons */
+.action-created {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.action-created:hover:not(:disabled) {
+  background-color: #e2e3e5;
 }
 
 .action-open {
@@ -234,6 +245,17 @@
 
 .action-finalized:hover:not(:disabled) {
   background-color: #157347;
+}
+
+/* Reversion action buttons */
+.action-btn[class*="action-"][class*="backward"] {
+  background-color: #f8d7da;
+  color: #842029;
+  border-left: 4px solid #dc3545;
+}
+
+.action-btn[class*="action-"][class*="backward"]:hover:not(:disabled) {
+  background-color: #f5c2c7;
 }
 
 .action-manage-players {
