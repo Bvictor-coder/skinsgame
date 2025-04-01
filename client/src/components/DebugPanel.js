@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dataSync from '../utils/dataSync';
 
 /**
@@ -16,6 +16,50 @@ const DebugPanel = () => {
   // State for storing localStorage contents (commented out to avoid eslint warning)
   const [/*currentStorage*/, setCurrentStorage] = useState({});
   const [autoRefresh, setAutoRefresh] = useState(false);
+
+  // Load games from localStorage via dataSync
+  const loadGames = useCallback(async () => {
+    try {
+      const gamesData = await dataSync.getGames();
+      setGames(gamesData);
+      
+      // Select first game if none selected
+      if (!selectedGameId && gamesData.length > 0) {
+        setSelectedGameId(gamesData[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading games for debug panel:', err);
+    }
+  }, [selectedGameId]);
+  
+  // Dump current localStorage contents
+  const dumpStorage = useCallback(() => {
+    try {
+      const storage = {};
+      
+      const mainData = localStorage.getItem('golfSkinsOrganizer');
+      if (mainData) {
+        storage.main = JSON.parse(mainData);
+      }
+      
+      const userData = localStorage.getItem('golfSkinsUser');
+      if (userData) {
+        storage.user = JSON.parse(userData);
+      }
+      
+      setCurrentStorage(storage);
+    } catch (err) {
+      console.error('Error dumping storage:', err);
+    }
+  }, []);
+  
+  // Handle storage changes from other tabs/windows
+  const handleStorageChange = useCallback((event) => {
+    if (event.key === 'golfSkinsOrganizer') {
+      loadGames();
+      dumpStorage();
+    }
+  }, [loadGames, dumpStorage]);
 
   // Load all games on component mount
   useEffect(() => {
@@ -43,7 +87,7 @@ const DebugPanel = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh, loadGames]);
+  }, [autoRefresh, loadGames, dumpStorage]);
   
   // Update selected game when games change or selected ID changes
   useEffect(() => {
@@ -52,50 +96,6 @@ const DebugPanel = () => {
       setSelectedGame(game || null);
     }
   }, [games, selectedGameId]);
-
-  // Load games from localStorage via dataSync
-  const loadGames = async () => {
-    try {
-      const gamesData = await dataSync.getGames();
-      setGames(gamesData);
-      
-      // Select first game if none selected
-      if (!selectedGameId && gamesData.length > 0) {
-        setSelectedGameId(gamesData[0].id);
-      }
-    } catch (err) {
-      console.error('Error loading games for debug panel:', err);
-    }
-  };
-  
-  // Handle storage changes from other tabs/windows
-  const handleStorageChange = (event) => {
-    if (event.key === 'golfSkinsOrganizer') {
-      loadGames();
-      dumpStorage();
-    }
-  };
-  
-  // Dump current localStorage contents
-  const dumpStorage = () => {
-    try {
-      const storage = {};
-      
-      const mainData = localStorage.getItem('golfSkinsOrganizer');
-      if (mainData) {
-        storage.main = JSON.parse(mainData);
-      }
-      
-      const userData = localStorage.getItem('golfSkinsUser');
-      if (userData) {
-        storage.user = JSON.parse(userData);
-      }
-      
-      setCurrentStorage(storage);
-    } catch (err) {
-      console.error('Error dumping storage:', err);
-    }
-  };
   
   // Toggle panel visibility
   const toggleVisibility = () => {

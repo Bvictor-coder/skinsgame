@@ -354,8 +354,8 @@ class DataSyncService {
       
       // Convert local signup structure to match server structure
       const localSignupsFlat = [];
-      Object.entries(this.localData.signups).forEach(([gameId, signups]) => {
-        signups.forEach(signup => {
+      Object.entries(this.localData.signups).forEach(([gameId, gameSignups]) => {
+        gameSignups.forEach(signup => {
           localSignupsFlat.push({
             gameId,
             playerId: signup.playerId,
