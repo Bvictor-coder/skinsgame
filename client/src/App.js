@@ -10,11 +10,13 @@ import UpcomingGames from './components/UpcomingGames';
 import PairingsAndGroups from './components/PairingsAndGroups';
 import PlayerSignUp from './components/PlayerSignUp';
 import ScoreCardPage from './components/ScoreCardPage';
+import GameManagement from './components/GameManagement';
 import dataSync from './utils/dataSync';
 import './styles.css'; // Import our enhanced styles
 import './styles/ManualAdjustmentStyles.css'; // Import manual adjustment interface styles
 import './styles/ShotgunStartStyles.css'; // Import shotgun start styles
 import './styles/ScorecardStyles.css'; // Import scorecard styles
+import './styles/GameManagementStyles.css'; // Import game management styles
 
 // Import the simplified component for debugging
 import SimplePairingsAndGroups from './components/SimplePairingsAndGroups';
@@ -85,6 +87,7 @@ const AppContent = () => {
       switch (user.role) {
         case ROLES.ADMIN:
           // Admin-specific tabs
+          tabs.push({ id: 'game-management', label: 'Game Management' });
           tabs.push({ id: 'new-game', label: 'Create New Game' });
           tabs.push({ id: 'admin-sign-up', label: 'Weekly Sign-up' });
           tabs.push({ id: 'grouping', label: 'Pairings & Groups' });
@@ -194,6 +197,12 @@ const AppContent = () => {
           {/* Admin Tabs */}
   {user.role === ROLES.ADMIN && (
     <>
+      {activeTab === 'game-management' && (
+        <div id="game-management">
+          <GameManagement />
+        </div>
+      )}
+      
       {activeTab === 'new-game' && (
         <div id="new-game">
           <NewGameForm />
