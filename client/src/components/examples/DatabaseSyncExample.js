@@ -14,9 +14,9 @@ import {
   restoreFromBackup
 } from '../../store/actions/syncActions';
 import { 
-  getGames, 
-  getGameById, 
-  getGameError 
+  selectAllGames, 
+  selectGameById, 
+  selectGamesError 
 } from '../../store/selectors/gameSelectors';
 import {
   getStorageMode,
@@ -33,12 +33,12 @@ const DatabaseSyncExample = () => {
   const dispatch = useDispatch();
   
   // Connect to Redux state via selectors
-  const games = useSelector(getGames);
+  const games = useSelector(selectAllGames);
   const storageMode = useSelector(getStorageMode);
   const apiAvailable = useSelector(isApiAvailable);
   const syncing = useSelector(isSyncing);
   const lastSync = useSelector(getLastSyncTime);
-  const error = useSelector(getSyncError) || useSelector(getGameError);
+  const error = useSelector(getSyncError) || useSelector(selectGamesError);
   
   // Local state
   const [selectedGameId, setSelectedGameId] = useState(null);
@@ -64,7 +64,7 @@ const DatabaseSyncExample = () => {
   
   // Get the selected game
   const selectedGame = useSelector(state => 
-    selectedGameId ? getGameById(state, selectedGameId) : null
+    selectedGameId ? selectGameById(state, selectedGameId) : null
   );
   
   // Form input change handler
