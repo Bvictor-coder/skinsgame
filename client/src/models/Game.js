@@ -233,11 +233,27 @@ class Game {
   
   /**
    * Convert game to a plain object for storage/API
+   * Safely handles circular references
    * @returns {Object} Plain JavaScript object representation
    */
   toJSON() {
-    // Return a copy of all properties
-    return JSON.parse(JSON.stringify(this));
+    // List of properties to serialize
+    const propertiesToSerialize = [
+      'id', 'date', 'time', 'course', 'holes', 'entryFee', 'notes',
+      'ctpHole', 'ctpPlayerId', 'wolfEnabled', 'status', 'statusHistory',
+      'createdAt', 'openedAt', 'enrollmentCompletedAt', 'startedAt',
+      'completedAt', 'finalizedAt', 'groups', 'scores'
+    ];
+    
+    // Create a new object with just the specified properties
+    const result = {};
+    propertiesToSerialize.forEach(prop => {
+      if (this[prop] !== undefined) {
+        result[prop] = this[prop];
+      }
+    });
+    
+    return result;
   }
   
   /**
@@ -254,7 +270,9 @@ class Game {
    * @returns {Game} New game instance with same properties
    */
   clone() {
-    return new Game(this.toJSON());
+    // Use the safe toJSON method to get a clean copy of properties
+    const data = this.toJSON();
+    return new Game(data);
   }
   
   /**
