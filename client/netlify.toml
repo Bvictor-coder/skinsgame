@@ -1,11 +1,14 @@
 [build]
   base = "client"
   publish = "build"
-  command = "CI=false npm run build"
+  command = "DISABLE_ESLINT_PLUGIN=true npm run build"
 
 [build.environment]
   NODE_VERSION = "16"
   NPM_VERSION = "8"
+  REACT_APP_ADMIN_PASSWORD = "${REACT_APP_ADMIN_PASSWORD}"
+  REACT_APP_API_URL = "${REACT_APP_API_URL}"
+  REACT_APP_USE_API = "${REACT_APP_USE_API}"
 
 [[redirects]]
   from = "/*"
