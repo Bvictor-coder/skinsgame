@@ -757,11 +757,15 @@ export const processRealScores = (rawScoreData, players, courseData = MONARCH_DU
   }).filter(Boolean);
 };
 
+// Add an alias for calculateSkins as calculateGameSkins for backward compatibility
+export const calculateGameSkins = calculateSkins;
+
 export default {
   MONARCH_DUNES_DATA,
   COURSE_DATA,
   GAME_FORMATS,
   calculateSkins,
+  calculateGameSkins,
   calculateHandicapStrokes,
   calculateNetScores,
   generatePlayerSummary,
