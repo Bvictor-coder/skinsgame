@@ -197,28 +197,47 @@ class StorageManager {
    * @returns {Promise<boolean>} True if deleted successfully
    */
   async delete(id) {
-    // In HYBRID mode, delete from both API and local
-    if (this.mode === STORAGE_MODES.HYBRID) {
-      let apiSuccess = true;
+    // Call dataSync.deleteGame which handles both local and API storage
+    try {
+      console.log(`StorageManager: Deleting game ${id}`);
       
-      try {
-        if (this.apiAvailable) {
-          apiSuccess = await this.apiStorage.delete(id);
+      // Import and use dataSync to ensure changes are reflected everywhere
+      const dataSync = (await import('../utils/dataSync')).default;
+      const success = await dataSync.deleteGame(id);
+      
+      if (success) {
+        console.log(`StorageManager: Successfully deleted game ${id}`);
+        return true;
+      } else {
+        console.warn(`StorageManager: Failed to delete game ${id}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`StorageManager: Error deleting game ${id}:`, error);
+      
+      // Fallback to original implementation if dataSync throws an error
+      if (this.mode === STORAGE_MODES.HYBRID) {
+        let apiSuccess = true;
+        
+        try {
+          if (this.apiAvailable) {
+            apiSuccess = await this.apiStorage.delete(id);
+          }
+        } catch (err) {
+          console.warn(`API delete failed, falling back to local delete: ${err.message}`);
+          this.apiAvailable = false;
+          apiSuccess = false;
         }
-      } catch (error) {
-        console.warn(`API delete failed, falling back to local delete: ${error.message}`);
-        this.apiAvailable = false;
-        apiSuccess = false;
+        
+        const localSuccess = await this.localStorage.delete(id);
+        
+        // If either succeeded, consider it successful
+        return apiSuccess || localSuccess;
       }
       
-      const localSuccess = await this.localStorage.delete(id);
-      
-      // If either succeeded, consider it successful
-      return apiSuccess || localSuccess;
+      // For API or LOCAL mode, use the appropriate storage
+      return this.getStorage().delete(id);
     }
-    
-    // For API or LOCAL mode, use the appropriate storage
-    return this.getStorage().delete(id);
   }
   
   /**

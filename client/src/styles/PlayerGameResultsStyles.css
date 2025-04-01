@@ -1,0 +1,293 @@
+/* Player Game Results Styles */
+.player-game-results {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.game-results-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.game-results-header h2 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 24px;
+}
+
+.game-date {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.game-status {
+  margin-top: 15px;
+}
+
+/* Personal results section */
+.your-results-summary {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.your-results-summary h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.player-result-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.result-section {
+  flex: 1;
+  min-width: 120px;
+}
+
+.result-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.result-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.ctp-badge {
+  background-color: #17a2b8;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+/* Results sections */
+.results-sections {
+  margin-bottom: 30px;
+}
+
+.results-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results-section h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Tables */
+.results-table, .skins-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.results-table th, .skins-table th {
+  text-align: left;
+  padding: 10px;
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.results-table td, .skins-table td {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+  color: #212529;
+}
+
+/* Highlighting */
+.winner-highlight {
+  background-color: #e8f4f8;
+}
+
+.current-player-highlight {
+  background-color: #fff8e1;
+  font-weight: 600;
+}
+
+.winning-skin {
+  background-color: #e8f5e9;
+}
+
+.score-display {
+  white-space: nowrap;
+}
+
+.handicap-indicator {
+  color: #fb8c00;
+  font-size: 10px;
+  position: relative;
+  top: -4px;
+  margin-left: 1px;
+}
+
+.score-type {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.birdie {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.eagle {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.albatross {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.par {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.bogey, .double {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* CTP Winner section */
+.ctp-winner-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ctp-winner-section h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.ctp-winner-display {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* Navigation buttons */
+.results-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.results-nav-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0069d9;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Loading and error states */
+.loading, .error-message, .no-results {
+  padding: 40px 20px;
+  text-align: center;
+  border-radius: 8px;
+  margin: 30px 0;
+}
+
+.loading {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.no-results {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .player-result-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .result-section {
+    width: 100%;
+  }
+  
+  .results-table, .skins-table {
+    font-size: 12px;
+  }
+  
+  .results-table th, .skins-table th,
+  .results-table td, .skins-table td {
+    padding: 8px 4px;
+  }
+}

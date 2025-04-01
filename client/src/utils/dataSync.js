@@ -546,6 +546,32 @@ class DataSyncService {
     this.localData.friends = this.localData.friends.filter(f => f.id !== id);
     this.saveToLocalStorage();
   }
+  
+  /**
+   * Delete a game
+   */
+  async deleteGame(id) {
+    await this.ensureInitialized();
+    
+    if (this.useApi) {
+      try {
+        await api.games.delete(id);
+      } catch (error) {
+        console.error('Error deleting game from API:', error);
+      }
+    }
+    
+    // Delete from local storage regardless of API success
+    this.localData.games = this.localData.games.filter(g => g.id !== id);
+    
+    // Also clean up any signups for this game
+    if (this.localData.signups && this.localData.signups[id]) {
+      delete this.localData.signups[id];
+    }
+    
+    this.saveToLocalStorage();
+    return true; // Indicate success
+  }
 
   /**
    * Get all games

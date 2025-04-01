@@ -155,6 +155,47 @@ export const UserProvider = ({ children }) => {
 
   // Check if the user is authenticated
   const isAuthenticated = () => user.role !== ROLES.GUEST;
+  
+  // Check if the user can view a scorecard (admins, scorekeepers, or players in the game)
+  const canViewScorecard = (gameId, groupIndex) => {
+    // Admins can view all scorecards
+    if (user.role === ROLES.ADMIN) return true;
+    
+    // Scorekeepers can view the scorecard for their assigned game and group
+    if (user.role === ROLES.SCOREKEEPER && 
+        user.gameId === gameId && 
+        user.groupIndex === groupIndex) {
+      return true;
+    }
+    
+    // Players can view scorecards for games they're in
+    // This permission will be checked at the component level against signups
+    if (user.role === ROLES.PLAYER) {
+      return true; // Allow players to view but not edit
+    }
+    
+    return false;
+  };
+  
+  // Check if the user can edit a scorecard (only admins or assigned scorekeepers)
+  const canEditScorecard = (gameId, groupIndex) => {
+    // Admins can edit all scorecards
+    if (user.role === ROLES.ADMIN) return true;
+    
+    // Scorekeepers can only edit the scorecard for their assigned game and group
+    if (user.role === ROLES.SCOREKEEPER && 
+        user.gameId === gameId && 
+        user.groupIndex === groupIndex) {
+      return true;
+    }
+    
+    return false;
+  };
+  
+  // Check if user can view game results (all authenticated users)
+  const canViewResults = () => {
+    return user.role !== ROLES.GUEST;
+  };
 
   return (
     <UserContext.Provider
@@ -166,7 +207,10 @@ export const UserProvider = ({ children }) => {
         updateUserProfile,
         logout,
         hasRole,
-        isAuthenticated
+        isAuthenticated,
+        canViewScorecard,
+        canEditScorecard,
+        canViewResults
       }}
     >
       {children}
